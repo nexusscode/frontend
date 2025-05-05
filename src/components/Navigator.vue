@@ -1,19 +1,21 @@
 <template>
     <nav class="nav-bar">
-        <div class="nav-item">AI 면접 서비스</div>
+        <div class="nav-item">
+          <router-link to="/">AI 면접 서비스</router-link>
+        </div>
         
         <div class="nav-item center">
-            <a href="#" class="mr">공고등록</a>
-            <a href="#" class="mr">분석 기록</a>
-            <a href="#">커뮤니티</a>
+            <router-link to="/recruit" class="mr">공고등록</router-link>
+            <router-link to="/analysisrecord" class="mr">분석 기록</router-link>
+            <router-link to="/community">커뮤니티</router-link>
         </div>
         
         <div class="nav-item">
             <span class="mr-4"> 김민지님 </span>   <!-- 나중에 수정-->
-            <a href="#" class="flex items-center">
-                마이페이지
-                <img src="../assets/mypage_icon.svg" class="w-4 h-4 ml-1" alt="" />
-            </a>
+            <router-link to="/mypage" class="flex items-center">
+              마이페이지
+              <img src="../assets/mypage_icon.svg" class="w-4 h-4 ml-1" alt="" />
+            </router-link>
         </div>
     </nav>
 
