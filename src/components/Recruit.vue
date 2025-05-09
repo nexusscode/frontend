@@ -38,3 +38,4 @@ function getCurrentComponent() { // 탭 내용 불러옴
 }
 
 </script>
+
