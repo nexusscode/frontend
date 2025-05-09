@@ -7,7 +7,9 @@ import Navigator from './components/Navigator.vue'
   <div class="font-sans">
     <Background />
     <Navigator />
-    <router-view />
+    <div class="mt-10">
+      <router-view />
+    </div>
   </div>
 
 

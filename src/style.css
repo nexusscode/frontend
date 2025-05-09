@@ -58,6 +58,10 @@ button:focus-visible {
   padding: 2em;
 }
 
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
 #app {
   max-width: none;
   max-height: none;

@@ -5,6 +5,8 @@ import Recruit from '@/components/Recruit.vue'
 import AnalysisRecord from '@/components/AnalysisRecord.vue'
 import Community from '@/components/Community.vue'
 import MyPage from '@/components/MyPage.vue'
+import SelfIntro from '@/components/SelfIntro.vue'
+import Interview from '@/components/Interview.vue'
 
 const routes = [
   { path: '/', name: 'Main', component: MainPage },
@@ -12,6 +14,8 @@ const routes = [
   { path: '/analysisrecord', name: 'AnalysisRecord', component: AnalysisRecord },
   { path: '/community', name: 'Community', component: Community },
   { path: '/mypage', name: 'MyPage', component: MyPage },
+  { path: '/coverletter', name: 'SelfIntro', component: SelfIntro },
+  { path: '/interview', name: 'Interview', component: Interview },
 ]
 
 const router = createRouter({
