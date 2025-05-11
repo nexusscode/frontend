@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-screen">
-    <div class="fixed left-0 top-1/4 -translate-y-1/2 space-y-2"> <!-- 탭 버튼 -->
+  <div class="relative flex top-10 min-h-[calc(100vh-84px)]">
+    <div class="fixed left-0 space-y-2"> <!-- 탭 버튼 -->
       <button
         v-for="(tab, index) in tabs"
         :key="index"
@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <div class="ml-20 mr-20 mt-10 p-8 flex-1">
+    <div class="ml-20 mr-20 px-8 pb-8 flex-1">
       <component :is="getCurrentComponent()" />
     </div>
   </div>
