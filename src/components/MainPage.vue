@@ -1,3 +1,4 @@
+<!-- 메인 화면 -->
 <template>
     <div class="content flex flex-row w-full">
         <div class="w-1/2 pr-4 ml-32 flex flex-col justify-start items-start"> <!-- 왼쪽 영역 -->
@@ -45,8 +46,8 @@
                             <div class="flex justify-between w-full">
                                 <span>{{ company.position }}</span>
                                 <div class="flex justify-between w-2/3 text-right gap-2">
-                                    <span class="w-1/3 truncate">{{ company.career }}</span>
-                                    <span class="w-2/3 truncate">{{ company.company }}</span>
+                                    <span class="w-1/3 truncate">{{ company.experience_level }}</span>
+                                    <span class="w-2/3 truncate">{{ company.company_name }}</span>
                                 </div>
                             </div>
                         </li>
@@ -70,11 +71,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { allItems } from '@/data/dummyData'
+import { recruits } from '@/data/dummyData'
 
 // 검색 부분
 // 더미 데이터
-const companies = ref([...allItems])
+const companies = ref([...recruits])
 
 const search = ref('') // 사용자 입력 값(검색어)
 const results = ref([]) // 검색 결과들
@@ -83,11 +84,11 @@ const results = ref([]) // 검색 결과들
 function handleSearch() {
     const keyword = search.value.toLowerCase()
     results.value = companies.value.filter(c =>
-        c.company.toLowerCase().includes(keyword)
+        c.company_name.toLowerCase().includes(keyword)
     )
 }
 function selectCompany(company) {
-    search.value = `${company.position} / ${company.career} / ${company.company}`
+    search.value = `${company.position} / ${company.experience_level} / ${company.company_name}`
     results.value = []
 }
 

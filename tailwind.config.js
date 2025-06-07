@@ -21,6 +21,7 @@ export default {
         'stateIng' : 'rgba(134, 247, 189, 0.5)',
         'stateComplete' : 'rgba(231, 187, 255, 0.5)',
         'stateError' : 'rgba(247, 201, 173, 0.5)',
+        'aiBlue': '#0646E6',
       },
     },
   },
