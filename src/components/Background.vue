@@ -1,3 +1,4 @@
+<!-- 그라데이션 배경 -->
 <template>
     <div class="background-container"></div>
 </template>
