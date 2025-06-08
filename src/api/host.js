@@ -1,1 +1,0 @@
-export const API_SERVER_HOST = 'http://http://ec2.jobveloper.co.kr:8080'
