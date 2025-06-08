@@ -1,3 +1,4 @@
+<!-- 탭 부분 : 이제 안 쓰임(일단 남겨는 뒀습니다) -->
 <template>
   <div class="relative flex top-10 min-h-[calc(100vh-84px)]">
     <div class="fixed left-0 space-y-2"> <!-- 탭 버튼 -->

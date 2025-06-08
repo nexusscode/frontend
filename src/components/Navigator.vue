@@ -1,13 +1,14 @@
+<!-- 네비게이터 -->
 <template>
     <nav class="nav-bar relative">
         <div class="nav-item">
-          <router-link to="/">AI 면접 서비스</router-link>
+          <router-link to="/">Jobveloper</router-link>
         </div>
         
         <div class="nav-item absolute left-1/2 transform -translate-x-1/2">
             <router-link to="/recruit" class="mr">AI 검사</router-link>
-            <router-link to="/analysisrecord" class="mr">보관함</router-link>
-            <router-link to="/interviewreal">실제면접</router-link>
+            <router-link to="/savedrecord" class="mr">보관함</router-link>
+            <router-link to="interviewinfo/">실제 면접</router-link>
         </div>
         
         <div class="nav-item">
@@ -40,7 +41,7 @@
   left: 0;
   padding: 20px 120px;
   z-index: 40;
-  backdrop-filter: blur(10px); /* 백드롭 필터 - 네비게이션 블러 처리 */
+  backdrop-filter: blur(100px); /* 백드롭 필터 - 네비게이션 블러 처리 */
 }
 .nav-item { /* 알약 모양 도형형 */
   display: flex;
