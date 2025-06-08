@@ -5,14 +5,14 @@
         </div>
         
         <div class="nav-item absolute left-1/2 transform -translate-x-1/2">
-            <router-link to="/recruit" class="mr">공고등록</router-link>
-            <router-link to="/analysisrecord" class="mr">분석 기록</router-link>
-            <router-link to="/community">커뮤니티</router-link>
+            <router-link to="/recruit" class="mr">AI 검사</router-link>
+            <router-link to="/analysisrecord" class="mr">보관함</router-link>
+            <router-link to="/interviewreal">실제면접</router-link>
         </div>
         
         <div class="nav-item">
-            <span class="mr-4"> 김민지님 </span>   <!-- 나중에 수정-->
-            <router-link to="/mypage" class="flex items-center">
+            <span class="mr-4"> {{ user.userName }} </span>   <!-- 나중에 수정-->
+            <router-link :to = route class="flex items-center">
               마이페이지
               <img src="../assets/mypage_icon.svg" class="w-4 h-4 ml-1" alt="" />
             </router-link>
@@ -20,7 +20,13 @@
     </nav>
 
 </template>
+<script setup>
+  import {ref} from 'vue'
+  import { useUserStore } from '../stores/user';
 
+  const user = useUserStore()
+  const route = user.userName === '로그인' ? "/login" : "mypage"
+</script>
 
 <style scoped>
 .nav-bar { /* 네비게이션 바, z-index : 40 */
