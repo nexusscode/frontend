@@ -1,3 +1,4 @@
+
            <template>
            <div class="fixed inset-0 flex justify-center items-center bg-gray-200/50 z-50">
                 <div name="modal_box" class="flex flex-col px-12 py-8 rounded-2xl bg-white">
@@ -21,3 +22,4 @@
                 emit('postResume')
             }
             </script>
+

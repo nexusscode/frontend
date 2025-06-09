@@ -45,11 +45,11 @@
                 <div class="w-1/5 text-start">이용약관동의</div>
                 <div class="flex flex-col">
                     <label for="all-agree" class="flex items-center"><input type="checkbox" @click="allCheck" id="all-agree" value="all-agree" v-model="agrees" class="mr-2">전체 동의합니다</label> <!--수정-->
-                    <label for="rule-agree" class="flex items-center my-1"><input type="checkbox"  id="rule-agree" value="rule-agree" v-model="agrees" class="mr-2">이용약관 동의 (필수)</label>
-                    <label for="info-agree" class="flex items-center"><input type="checkbox"  id="info-agree" value="info-agree" v-model="agrees" class="mr-2">개인정보수집 동의 (필수)</label>
+                    <label for="rule-agree" class="flex items-center my-1"><input type="checkbox" id="rule-agree" value="rule-agree" v-model="agrees" class="mr-2">이용약관 동의 (필수)</label>
+                    <label for="info-agree" class="flex items-center"><input type="checkbox" id="info-agree" value="info-agree" v-model="agrees" class="mr-2">개인정보수집 동의 (필수)</label>
                 </div>
             </div>
-            <button @click="createUser" class="self-center px-10 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white"> <!--api-->
+            <button @click="createUser;$emit('close')" class="self-center px-10 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white"> <!--api-->
                 회원가입
             </button>
         </div>
@@ -72,6 +72,7 @@
     const phonesecondnum = ref('')
     const phonelastnum = ref('')
     const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
+
     const position = ref('')
     const career = ref('')
     const agrees = ref([])
@@ -107,13 +108,14 @@
         }
     }
 */
-    
+
     const createUser = async () => {
         try {
             if(!isAllChecked){
                 alert('약관에 모두 동의해주세요.')
                 return
             }
+
             const response = await axios.post(`${host}/api/user/signup`, {
                 email: userEmail.value,
                 password: userPW.value,
@@ -127,7 +129,6 @@
             console.error('에러 발생:', error)
         }
     }
-
 </script>
 <style>
     select:required:invalid {

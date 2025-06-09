@@ -18,6 +18,9 @@ import DiscResult from '@/components/DiscResult.vue'
 import DevTest from '@/components/DevTest.vue'
 import DevResult from '@/components/DevResult.vue'
 import RecruitInfo from '@/components/RecruitInfo.vue'
+import SelfIntro from '@/components/SelfIntro.vue'
+import SelfIntroResult from '@/components/SelfIntroResult.vue'
+import Interview from '@/components/Interview.vue'
 import InterviewResult from '@/components/InterviewResult.vue'
 
 const routes = [

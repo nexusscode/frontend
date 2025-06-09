@@ -31,7 +31,6 @@
     import { useRouter } from 'vue-router';
     import { useUserStore } from "@/stores/user";
     import { createPinia, setActivePinia } from 'pinia'
-
     import Login_JoinModal from './login_modal/Login_JoinModal.vue'
     import Login_findIDModal from './login_modal/Login_findIDModal.vue'
     import Login_findPWModal from './login_modal/Login_findPWModal.vue'
@@ -62,5 +61,4 @@
         }
         router.push('/')
     }
-        
 </script>

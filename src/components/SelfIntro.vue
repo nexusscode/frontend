@@ -97,7 +97,6 @@
         event.target.style.height = '1px'
         event.target.style.height = event.target.scrollHeight + 'px'
     }
-
     function modifyAndBackup(id, index){ // 수정/취소 버튼 open
         backupHeight.value = document.getElementById(id).style.height
         beforeText[index] = nowText[index]
@@ -131,7 +130,6 @@
         isOpenAdd.value = false
         addQuestion.value = ''
     }
-
     function questionDelete(index){
         items.splice(index,1)
         nowText.splice(index,1)

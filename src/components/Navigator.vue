@@ -27,6 +27,7 @@
 
   const user = useUserStore()
   const route = (user.userName === '로그인') ? "/login" : "/mypage"
+
 </script>
 
 <style scoped>
