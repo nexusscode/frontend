@@ -1,18 +1,19 @@
+<!-- 네비게이터 -->
 <template>
     <nav class="nav-bar relative">
         <div class="nav-item">
-          <router-link to="/">AI 면접 서비스</router-link>
+          <router-link to="/">Jobveloper</router-link>
         </div>
         
         <div class="nav-item absolute left-1/2 transform -translate-x-1/2">
-            <router-link to="/recruit" class="mr">공고등록</router-link>
-            <router-link to="/analysisrecord" class="mr">분석 기록</router-link>
-            <router-link to="/community">커뮤니티</router-link>
+            <router-link to="/recruit" class="mr">AI 검사</router-link>
+            <router-link to="/savedrecord" class="mr">보관함</router-link>
+            <router-link to="interviewinfo/">실제 면접</router-link>
         </div>
         
         <div class="nav-item">
-            <span class="mr-4"> 김민지님 </span>   <!-- 나중에 수정-->
-            <router-link to="/mypage" class="flex items-center">
+            <span class="mr-4"> {{ user.userName }} </span>   <!-- 나중에 수정-->
+            <router-link :to = "route" class="flex items-center">
               마이페이지
               <img src="../assets/mypage_icon.svg" class="w-4 h-4 ml-1" alt="" />
             </router-link>
@@ -20,7 +21,13 @@
     </nav>
 
 </template>
+<script setup>
+  import {ref} from 'vue'
+  import { useUserStore } from '../stores/user';
 
+  const user = useUserStore()
+  const route = (user.userName === '로그인') ? "/login" : "/mypage"
+</script>
 
 <style scoped>
 .nav-bar { /* 네비게이션 바, z-index : 40 */
@@ -34,7 +41,7 @@
   left: 0;
   padding: 20px 120px;
   z-index: 40;
-  backdrop-filter: blur(10px); /* 백드롭 필터 - 네비게이션 블러 처리 */
+  backdrop-filter: blur(100px); /* 백드롭 필터 - 네비게이션 블러 처리 */
 }
 .nav-item { /* 알약 모양 도형형 */
   display: flex;

@@ -1,3 +1,4 @@
+<!-- 공고 등록 모달창 -->
 <template> <!-- 모달창, z-index : 50-->
     <div class="fixed px-2 inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="relative bg-white py-6 px-14 rounded-2xl ml-72 mr-72 w-full">
@@ -27,8 +28,8 @@
                 <div class="flex justify-between w-full">
                   <span>{{ company.position }}</span>
                   <div class="flex justify-between w-1/2 text-right space-x-4 mr-8 gap-12">
-                    <span class="w-1/2 truncate">{{ company.career }}</span>
-                    <span class="w-1/2 truncate">{{ company.company }}</span>
+                    <span class="w-1/2 truncate">{{ company.experience_level }}</span>
+                    <span class="w-1/2 truncate">{{ company.company_name }}</span>
                   </div>
                 </div>
               </li>
@@ -38,12 +39,15 @@
 
         <div class="flex items-center justify-end mt-7 mb-4 gap-2">
           <button 
-            class="px-12 h-12 bg-white text-base font-semibold text-btnBlue border-btnBlue rounded-xl hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white"
-            @click.self="close"
+            class="px-12 h-12 bg-white text-lg font-semibold text-btnBlue border-btnBlue rounded-xl hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white"
+            @click="close"
           >
             취소하기
           </button>
-          <button class="px-12 h-12 bg-btnBlue text-lg font-semibold text-white rounded-xl hover:bg-hover active:bg-pressed">
+          <button 
+            class="px-12 h-12 bg-btnBlue text-lg font-semibold text-white rounded-xl hover:bg-hover active:bg-pressed"
+            @click="addRecruit()"
+          >
             등록하기 <!-- 수정 필요 -->
           </button> 
         </div>
@@ -58,11 +62,13 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue'
-  import { allItems } from '@/data/dummyData'
+  import { ref } from 'vue'
+  import { allItems, recruits } from '@/data/dummyData'
   
   // 더미 데이터
-  const companies = ref([...allItems])
+  const Items = ref([...allItems])
+  const companies = ref([...recruits])
+  const selectedRecruit = ref(null)
 
   const emit = defineEmits(['close']) // 모달 창 오픈 여부 결정
   const close = () => emit('close')
@@ -71,16 +77,45 @@
   const results = ref([]) // 검색 결과들
   //const isLoading = ref(false) // 로딩 표시
 
-  function handleSearch() {
+  function handleSearch() { // 공고 검색 기능
     const keyword = search.value.toLowerCase()
     results.value = companies.value.filter(c =>
-      c.company.toLowerCase().includes(keyword)
+      c.company_name.toLowerCase().includes(keyword)
     )
   }
-  function selectCompany(company) {
-    search.value = `${company.position} / ${company.career} / ${company.company}`
+  function selectCompany(recruit) { // 공고 선택
+    search.value = `${recruit.position} / ${recruit.experience_level} / ${recruit.company_name}`
+    selectedRecruit.value = recruit
     results.value = []
   }
 
+  function formatDate() { // 날짜 포맷 맞추기
+    const date = new Date()
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}/${m}/${d}`
+  }
+  function addRecruit() { // 공고 등록 기능
+    const sRecruit = selectedRecruit.value
+    if (!sRecruit) {
+      // console.warn('회사 정보가 선택되지 않았습니다.')
+      return
+    }
+    const newItem = {
+      id: Math.max(...Items.value.map(item => item.id), 0) + 1, 
+      company_name: sRecruit.company_name, 
+      position: sRecruit.position, 
+      experience_level: sRecruit.experience_level, 
+      created_at: formatDate(), 
+      stateCoverletter: 0, 
+      stateInterview: 0,
+    }
+    // console.log('dummyData Update : ', newItem)
+    // allItems.push(newItem)
+    // 더미데이터에는 반영 안 됨 -> 나중에 api 연결 시에 만들기! 
+
+    emit('close')
+  }
   </script>
   
