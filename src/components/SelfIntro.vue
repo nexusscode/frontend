@@ -60,7 +60,8 @@
     import {ref, reactive, onMounted} from 'vue'
     import SelfIntro_fileModal from './SelfIntro_fileModal.vue'
     import SelfIntro_evalModal from './SelfIntro_evalModal.vue'
-    import { resume_items } from '../data/defaultResumeQuestions'
+    import { resume_items } from '../data/defaultQuestions'
+    import env from '../api/env'
 
     // const applicationId = ref(0) -> '검사하기' 버튼을 누르면 자기소개서에 해당하는 공고ID(application_id) 가 필요함
 /*

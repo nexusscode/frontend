@@ -14,6 +14,7 @@ export const allItems = [ // 이미 등록된 공고들
         stateInterview: 0,
 }))];
 
+    
 export const recruits = [ // 사람인 api로 받아오는 공고들
     ...Array.from({ length: 7 }, (_, i) => ({ 
         id: `saramin${i}`,
@@ -94,36 +95,56 @@ export const interview_summary = [ // 면접 요약
         summary: "지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다. 자신의 경험을 바탕으로 진솔하게 답변하려는 노력이 느껴졌습니다. 다만 일부 표현에서 반복 사용되는 어휘가 있어 전달력에 아쉬움이 있었습니다. 또한 문장 구성에서 주어와 서술어의 연결이 다소 어색한 부분이 관찰되었습니다. 표현력과 논리적인 구성력을 보완하신다면 더욱 설득력 있는 커뮤니케이션이 가능할 것으로 기대됩니다.", // 면접에 대한 전반적인 요약
         created_at: "", 
 }))];
-export const resume_items = [ // 자소서 입력 예시 (이제 미사용)
-    {
-        id: 0,
-        resume_item_id : 1,
-        feedback_text : '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-        created_at: 1,
-    },
-    {
-        id: 0,
-        resume_item_id : 1,
-        feedback_text : '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-        created_at: 1,
-    },
-    {
-        id: 0,
-        resume_item_id : 1,
-        feedback_text : '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-        created_at: 1,
-    },
-    {
-        id: 0,
-        resume_item_id : 1,
-        feedback_text : '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-        created_at: 1,
-    }
-];
+export const resumeItems = [
+        {
+            resumeItemId: 11,
+            resumeId: 1,
+            question: "입사하고 싶은 이유와 준비 과정을 구체적으로 작성해주세요.",
+            answer: "a",
+            aiCount: 0,
+        },
+        {
+            resumeItemId: 22,
+            resumeId: 1,
+            question: "본인이 끝까지 파고들어 본 가장 의미있었던 개발 경험 또는 개발 활동에 대해 얘기해 주세요. 그 개발 경험 또는 개발 활동을 통해 배운 점이 무엇인지, 본인의 '어떤 부분이 성장'했는지에 대해 작성해 주세요.",
+            answer: "a",
+            aiCount: 0,
+        },
+        {
+            resumeItemId: 33,
+            resumeId: 1,
+            question: "입사하고 싶은 이유와 준비 과정을 통상적으로 작성해주세요.",
+            answer: "a",
+            aiCount: 0,
+        },
+        {
+            resumeItemId: 44,
+            resumeId: 1,
+            question: "입사하고 싶은 이유와 준비 과정을 입체적으로 작성해주세요.",
+            answer: "a",
+            aiCount: 0,
+        },
+    ];
 
-export const resume_item_feedbacks = [ // 자소서 피드백 예시
-    '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-    '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-    '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
-    '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.',
+export const resumeItemFeedbacks = [ // 자소서 피드백 예시
+    {
+        feedbackId: 111,
+        resumeItemId : 1,
+        feedbackText: '지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다.지원자께서는 전반적으로 진중한 ',
+    },
+    {
+        feedbackId: 222,
+        resumeItemId : 2,
+        feedbackText: '입사하고 싶은 이유와 준비 과정을 통상적으로 작성해주세요..',
+    },
+    {
+        feedbackId: 333,
+        resumeItemId : 3,
+        feedbackText: '사용자의 답변입니다. 사용자의 답변입니다. 사용자의 답변입니다. 사용자의 답변입니다.',
+    },
+    {
+        feedbackId: 444,
+        resumeItemId : 4,
+        feedbackText: '일단 임시로 네이버/백엔드 지정해둠 .',
+    },
 ];

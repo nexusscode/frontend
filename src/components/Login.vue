@@ -54,8 +54,15 @@
     
     async function tryLogin() {
         try {
-            const res = await loginPost(userInfo)
-            console.log('로그인 성공:', res)
+            const data = await loginPost(userInfo)
+            console.log('로그인 성공:', data)
+            user.login(data)
+            console.log('userStore 전체:', user)
+            console.log('userId:', user.userId)
+            console.log('accessToken:', user.accessToken)
+            console.log('userName:', user.userName)
+            console.log('isLoggedIn:', user.isLoggedIn)
+
         } catch (error) {
             console.error('로그인 실패:', error)
         }

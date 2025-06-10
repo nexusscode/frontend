@@ -81,6 +81,7 @@
 import { surveyQuestions } from '../data/surveyQuestions'
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
+import env from '../api/env'
 
 const router = useRouter()
 // 질문 데이터 (예시)

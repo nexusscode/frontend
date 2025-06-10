@@ -52,7 +52,8 @@
   </template>
   <script setup>
     import MyPage_UpdateModal from './MyPage_UpdateModal.vue'
-    import {ref, reactive, onMounted} from 'vue'
+    import {ref, reactive, onBeforeMount, onMounted} from 'vue'
+    import env from '@/api/env'
     import { users } from '@/data/dummyData'
 
     const isOpenUpdate = ref(false)
@@ -101,5 +102,15 @@
     console.error('데이터 로딩 에러:', error)
   }
 })
+    
+
+    onBeforeMount(async () => {
+        try {
+            const response = await env.get(`/api/user`)
+            Object.assign(user, response.data.result)
+        } catch (err) {
+            console.error('API 오류:', err)
+        }
+    })
     
   </script>

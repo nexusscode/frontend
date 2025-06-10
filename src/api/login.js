@@ -5,7 +5,6 @@ import axios from "axios";
 const host = `${API_SERVER_HOST}`
 
 export const loginPost = async (loginParam) => {
-    const header = {headers: {"Content-Type":"x-www-form-urlencoded"}}
 
     const form = new FormData()
     form.append("username", loginParam.email)

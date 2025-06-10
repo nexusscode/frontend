@@ -3,20 +3,23 @@ import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    userId: '',
+    userId: 0,
+    accessToken: '',
     userName: '로그인',
     isLoggedIn : false,
     isDisced: false,
   }),
   actions: {
-    login(userId, userName) {
-      this.userId = userId;
-      this.userName = `${userName}님`;
+    login(data) {
+      this.userId = data.userId;
+      this.accessToken = data.accessToken;
+      this.userName = `${data.name}님`;
       this.isLoggedIn = true;
     },
     logout() {
       this.user = '';
       this.userName = '로그인';
+      this.accessToken = '';
       this.isLoggedIn = false;
     },
     doSurvey(surveyData){

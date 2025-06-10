@@ -2,28 +2,20 @@ import axios from "axios";
 import { getCookie, setCookie } from "./cookie";
 import { API_SERVER_HOST } from "./host";
 import { useUserStore } from "@/stores/user";
-import { createPinia, setActivePinia } from 'pinia'
 
-
-const pinia = createPinia()
-setActivePinia(pinia)
-
-const user = useUserStore()
+const host = `${API_SERVER_HOST}`
 
 const env = axios.create({
-  baseURL: 'http://ec2.jobveloper.co.kr:8080', // 여기에 Swagger API 주소
-  timeout: 5000,
-  headers: {
-    'Content-Type': 'application/json',
-  }
+  baseURL: `${host}`,
+  withCredentials: true
 })
 
-const refreshJWT = async (accessToken, refreshToken) => {
+const refreshJWT = async (accessToken) => {
     const host = API_SERVER_HOST
 
-    const header = {headers: {"Authorization" : `Bearer ${accessToken}`}}
+    const header = {headers: {"Authorization" : `Bearer ${accessToken}`},withCredentials: true}
 
-    const res = await axios.get(`${host}/api/member/refresh?refreshToken=${refreshToken}`, header)
+    const res = await axios.get(`${host}/api/member/refresh`, header)
 
     console.log("-----------------------------------")
     console.log(res.data)
@@ -32,10 +24,19 @@ const refreshJWT = async (accessToken, refreshToken) => {
 }
 
 const beforeReq = (config) => {
-    console.log("before request.......")
+    const user = useUserStore()
+    user.$subscribe((mutation, state) => {
 
-    const memberInfo = getCookie("member")
+})
+    console.log("before request.......")
     const userId = user.userId
+    const accessToken = user.accessToken
+    console.log('userId', userId)
+    console.log('accessToken:', accessToken)
+    console.log('userId:', user.userId)
+    console.log('accessToken:', user.accessToken)
+    //const memberInfo = getCookie("refreshToken")
+    /*
     if(!memberInfo) {
         console.log("MEMBER NOT FOUND")
         return Promise.reject(
@@ -47,12 +48,9 @@ const beforeReq = (config) => {
             }
         )
     }
-    const {accessToken} = memberInfo
-
+    */
     config.headers.Authorization = `Bearer ${accessToken}`
-
-    if(userId) config.headers.userId = userId;
-
+    config.headers.userId = userId
     return config
 }
 
@@ -69,9 +67,10 @@ const beforeRes = async(res) => {
     const data = res.data
 
     if(data && data.error === "ERROR_ACCESS_TOKEN"){
-        const memberCookieValue = getCookie("member")
+        const refreshToken = getCookie("refreshToken")
+        const accessToken = user.accessToken
 
-        const result = await refreshJWT(memberCookieValue.accessToken, memberCookieValue.refreshToken)
+        const result = await refreshJWT(accessToken)
         console.log("refreshJWT RESULT", result)
 
         memberCookieValue.accessToken = result.accessToken

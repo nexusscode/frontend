@@ -97,9 +97,9 @@
 </template>
 <script setup>
     import {ref, reactive} from 'vue'
-    import { resume_items } from '@/data/dummyData'
+    import { resumeItems } from '@/data/dummyData'
 
-    const items = reactive([...resume_items])
+    const items = reactive([...resumeItems])
     const questionCount = ref(items.length)
     
     const nowText = reactive(Array(questionCount.value).fill(''))

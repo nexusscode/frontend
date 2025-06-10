@@ -4,7 +4,7 @@
     <Background />
     <Navigator v-if="showNav" />
     <div class="">
-      <router-view />
+      <SelfIntroResult />
     </div>
   </div>
 
@@ -16,6 +16,7 @@ import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 import Background from './components/Background.vue'
 import Navigator from './components/Navigator.vue'
+import SelfIntroResult from './components/SelfIntroResult.vue';
 
 const route = useRoute();
 const hiddenNames = ['Interview']; // 네비게이션 없는 페이지
