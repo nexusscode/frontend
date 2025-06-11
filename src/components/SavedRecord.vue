@@ -1,6 +1,6 @@
 <!-- 보관함 탭 : 보관된 자소서 및 면접들 -->
 <template>
-    <div class="h-screen-minus-84 mt-10 ml-64 mr-64 flex"> <!-- h-screen -->
+    <div class="h-screen-minus-84 ml-64 mr-64 flex"> <!-- h-screen -->
         <div class="flex flex-col flex-1 justify-between h-[calc(100vh-145px)]">
             <div>
                 <div class="flex space-x-2 items-center">
@@ -31,7 +31,7 @@
                             @click="gotoResult(entry)"
                             class="flex flex-col bg-white rounded-xl p-4 w-fit border border-[#D1D1D1]"
                         >
-                            <img src="../assets/pdf_icon.svg" alt="PDF" class="w-28" />
+                            <img src="../assets/saved_icon.svg" alt="PDF" class="w-28" />
                         </button>
                         <span 
                             class="w-full truncate px-6 font-semibold mt-1 text-center"

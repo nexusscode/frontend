@@ -187,6 +187,9 @@ const webcamRef = ref(null); // 웹캡
 
 const transcript = ref('') // 음성 인식 결과
 const isRecording = ref(false) // 마이크 off
+const mediaRecorder = ref(null) // 인스턴스
+const audioChunks = ref([]) // 오디오 데이터 배열
+const audioBlob = ref(null)
 
 const currentTime = new Date(); //면접 시작 시간
 const elapsedTime = ref('00:00') // 경과 시간
@@ -321,45 +324,96 @@ onMounted(() => {
   }
 })
 
-const toggleRecording = () => { // 녹음 시작 / 정지
-  if (!recognition) return
+// const toggleRecording = () => { // 녹음 시작 / 정지
+//   if (!recognition) return
 
+//   if (isRecording.value) { // 녹음 정지
+//     recognition.stop()
+//   } else { // 녹음 시작
+//     recognition.start()
+//   }
+//   isRecording.value = !isRecording.value
+// }
+const toggleRecording = async () => { // 녹음 시작 / 정지
   if (isRecording.value) { // 녹음 정지
-    recognition.stop()
+    mediaRecorder.value.stop()
+    isRecording.value = false
   } else { // 녹음 시작
-    recognition.start()
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder.value = new MediaRecorder(stream)
+    audioChunks.value = [] // 오디오 초기화
+
+    mediaRecorder.value.ondataavailable = (event) => {
+      audioChunks.value.push(event.data)
+    }
+
+    mediaRecorder.value.onstop = () => {
+      if (audioChunks.value.length === 0) return
+      audioBlob.value = new Blob(audioChunks.value, { type: 'audio/webm' })
+
+      // 여기서부터 audioBlob을 서버로 전송하거나 파일로 저장 가능
+      console.log('녹음 완료. Blob:', audioBlob.value)
+
+    }
+
+    mediaRecorder.value.start()
+    isRecording.value = true
   }
-  isRecording.value = !isRecording.value
 }
 
 const resetTranscript = () => { // 재답변
-  if (isRecording.value) {
-    recognition.stop()
-    isRecording.value = false
+  // if (isRecording.value) {
+  //   recognition.stop()
+  //   isRecording.value = false
+  // }
+  // transcript.value = ''
+
+  if (isRecording.value && mediaRecorder.value?.state !== 'inactive') {
+    mediaRecorder.value.stop()
   }
-  transcript.value = ''
+  isRecording.value = false
+  audioChunks.value = []
+  audioBlob.value = null
+
+  console.log('재답변: 녹음 초기화 완료')
 }
 
 const completeTranscript = async () => {
-  if (!transcript.value.trim()) { // 답변 없으면 답변 완료 막기
-    console.warn("답변이 없습니다.");
+  // if (!transcript.value.trim()) { // 답변 없으면 답변 완료 막기
+  //   console.warn("답변이 없습니다.");
+  //   alert("답변이 없습니다.");
+  //   return;
+  // }
+  if (!audioBlob) { // 답변 없으면 답변 완료 막기
     alert("답변이 없습니다.");
     return;
   }
 
-  const currentQuestion = questions.value[q_idx.value]; //이거 아마 삭제
-  const answer = transcript.value;
+  // const currentQuestion = questions.value[q_idx.value]; //이거 아마 삭제
+  // const answer = transcript.value;
 
   // 음성 인식 중지 및 답변 초기화
-  if (isRecording.value) {
-    recognition.stop();
+  // if (isRecording.value) {
+  //   recognition.stop();
+  //   isRecording.value = false;
+  // }
+  if (isRecording.value && mediaRecorder.value?.state !== 'inactive') {
+    mediaRecorder.value.stop();
     isRecording.value = false;
   }
 
+
   try {
+    // 재생 테스트용 URL
+    const audioUrl = URL.createObjectURL(audioBlob.value)
+    const audio = new Audio(audioUrl)
+    audio.play()
+
     //여기에 api연결하기
 
-    transcript.value = '';
+    // transcript.value = '';
+    audioChunks.value = [];
+    audioBlob.value = null;
     inc_q_idx();
 
   } catch (error) {
