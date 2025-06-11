@@ -75,7 +75,6 @@
         }
     }
 
-
     const getPW = async (id) => { 
         try{
         const response = await axios.get(`https://api.example.com/users/${id}`) // 주소 신경쓰기
@@ -108,7 +107,6 @@
             console.error('에러 발생:', error)
         }
     }
-        
 </script>
 <style>
     

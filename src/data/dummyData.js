@@ -1,3 +1,18 @@
+export const allItems = [ // 이미 등록된 공고들 
+    { id: 100, company_name: "네이버", position: "백엔드 개발자", experience_level: "신입/경력", created_at: "2025/05/11", saramin_job_id: "saramin1", stateCoverletter: 0, stateInterview: 0, job_title: "개발자 신입 및 경력 모집" },
+    { id: 101, company_name: "카카오", position: "백엔드 개발자", experience_level: "경력", created_at: "2025/05/11", saramin_job_id: "saramin1", stateCoverletter: 1, stateInterview: 1, job_title: "백엔드개발자 신입 및 경력 모집" },
+    { id: 102, company_name: "네이버", position: "프론트 개발자", experience_level: "신입", created_at: "2025/05/11", saramin_job_id: "saramin1", stateCoverletter: 2, stateInterview: 2, job_title: "프론트 개발자 신입 모집" },
+    ...Array.from({ length: 50 }, (_, i) => ({ 
+        id: i,
+        company_name: `(주)리더스시스템즈 ${i}`,
+        position: "Full Stack 개발자",
+        experience_level: "경력/무관",
+        job_title: "풀스택 개발자 공채 모집", 
+        created_at: "2025/04/02",
+        saramin_job_id: "saramin1", // 사람인 공고 id -> 임시로 지정해둠(수정 필요)
+        stateCoverletter: 0,
+        stateInterview: 0,
+}))];
 
     
 export const recruits = [ // 사람인 api로 받아오는 공고들

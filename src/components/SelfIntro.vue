@@ -1,16 +1,18 @@
 <template>
-        <div name="all_box" class="pt-[84px] px-[120px] flex flex-col justify-between items-center w-auto">
-            <div name="first_box" class="w-2/3 px-16  h-48 flex flex-col justify-evenly items-center rounded-3xl bg-white/50">
-                <div class="flex w-full py-4 rounded-lg font-semibold text-lg">
-                    자기소개서 <div class="inline-block mt-1.5 ml-4 pb-2 text-xs font-semibold">자기소개서 문서 첨부 및 직접 작성으로 AI 분석을 받아보세요</div>
+    <div class="h-screen-minus-84 flex mt-10 ml-20 mr-20 px-8">
+        <div name="all_box" class="w-[1000px] px-8 py-5 mx-[140px] absolute top-32 flex flex-col justify-between items-center border border-white bg-white/50 rounded-xl">
+            <div name="button_area" class="flex w-full justify-between">
+                <div class="flex items-baseline rounded-lg font-bold text-lg">
+                        <p class="text-xl">자기소개서</p> <p class="text-sm font-semibold ml-3">자기소개서 문서 첨부 및 직접 작성으로 AI 분석을 받아보세요</p>
                 </div>
-                <a class="flex justify-center w-full py-3 border-[#576edf] border-2 rounded-xl text-center font-semibold text-lg" href="#">
-                    <img src="./ima.svg" alt="" class="w-4 h-4 mr-4">
-                    자기소개서 문서 추가 
-                </a>
-                <a class="self-end px-4 py-2 border my-4 text-sm bg-[#4f89fd] rounded-lg text-white" href="#">
-                    AI 검사 받기
-                </a>
+                <div class="flex self-center">
+                    <button @click="isOpenFile = true" class="px-8 py-1.5 border border-btnBlue text-sm font-semibold rounded-lg bg-white text-btnBlue">문서 추가</button>
+                    <SelfIntro_fileModal @postResume = "postResume" v-if="isOpenFile" @close="isOpenFile = false"/>
+                    <button @click="isOpenEval = true" class="px-7 py-1.5 border ml-[5px] text-sm rounded-lg bg-btnBlue text-white">
+                        AI 검사받기 
+                    </button>
+                    <SelfIntro_evalModal @postResume = "axiosFirstResume" v-if="isOpenEval" @close="isOpenEval = false"/> 
+                </div>
             </div>
             <div name="type_area" class="flex flex-col w-full h-full px-8 py-3 border-2 my-2 rounded-xl bg-white">
                 <div class="py-2 mb-2 self-start font-bold">(주)리더스시스템 - 개발자 신입 및 경력 모집</div>
@@ -40,17 +42,18 @@
                             <button @click="questionInsert" class="px-2 py-1.5 ml-2 bg-btnBlue text-white text-xs rounded-md">추가</button>
                         </div>
                     </div>
-                    <div class="flex flex-col px-8 pt-10 border-2 mt-4 rounded-xl bg-white">
-                        <p class="mb-4 text-[13px] font-semibold">1. 입사하고 싶은 이유와 준비 과정을 구체적으로 적어주세요.</p>
-                        <textarea ref="textArea" @input="resize" class="p-3 mb-4 rounded-md text-[11px] border border-gray-200 resize-vertical overflow-y-hidden min-h-[48px]"> 
-                        <p class="mb-4 text-[13px] font-semibold">1. 입사하고 싶은 이유와 준비 과정을 구체적으로 적어주세요.</p>
-                        <textarea ref="textArea" @input = "resize" class="p-3 mb-4 rounded-md text-[11px] border border-gray-200 resize-none overflow-y-hidden min-h-[48px]"> </textarea>
-                        <p class="mb-4 text-[13px] font-semibold">1. 입사하고 싶은 이유와 준비 과정을 구체적으로 적어주세요.</p>
-                        <textarea ref="textArea" @input = "resize" class="p-3 mb-4 rounded-md text-[11px] border border-gray-200 resize-none overflow-y-hidden min-h-[48px]"> </textarea>
-                    </div>
+                    <textarea
+                        @input="resize2($event)" 
+                        spellcheck="false"
+                        class="w-full h-px px-3 py-2 rounded-md text-[11px] resize-none overflow-y-hidden min-h-[30px] border border-gray-200 focus:outline outline-btnBlue"
+                    ></textarea>
                 </div>
+                <button @click="isOpenAdd = true" class="flex items-center self-center px-8 py-1.5 my-6 rounded-md bg-btnBlue text-white text-[12px]">
+                    <img src="../assets/add_self.svg" alt="" class="mr-2 w-[14px] h-[14px]">질문 추가하기
+                </button>
             </div>
         </div>
+    </div>
 </template>
 
 <script setup>
@@ -151,4 +154,5 @@
             console.error('에러 발생:', error)
         }
     }
+        */
 </script>
