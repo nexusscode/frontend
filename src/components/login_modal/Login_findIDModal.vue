@@ -16,8 +16,8 @@
                     <button @click="getVerifyNum" class="w-full py-1.5 ml-3 rounded-md border-btnBlue text-btnBlue">인증코드 받기</button> <!--api-->
                 </div>
             </div>
-            <input type="text" ref="verifyInput" placeholder="인증번호 입력" disabled class="self-center w-3/5 pl-4 py-1.5 border rounded-md font-normal">
-            <button @click="isVerifyNumCorrect;isOpen=false" class="self-center px-12 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white">
+            <input type="text" ref="verifyInput" v-model="code" placeholder="인증번호 입력" disabled class="self-center w-3/5 pl-4 py-1.5 border rounded-md font-normal">
+            <button @click="isVerifyNumCorrect" class="self-center px-12 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white">
                 다음 <!--api-->
             </button>
         </div>
@@ -32,61 +32,70 @@
     </div>
 </template>
 <script setup>
-import axios from 'axios'
-import {ref, reactive, computed} from 'vue'
+    import axios from 'axios'
+    import {ref, reactive, computed} from 'vue'
+    import { API_SERVER_HOST } from '@/api/host';
+
+    const host = `${API_SERVER_HOST}`
     const isOpen = ref(true)
     const userName = ref('')
     const phonefirstnum = ref('')
     const phonesecondnum = ref('')
     const phonelastnum = ref('')
-   // const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
+    const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
     const ID = ref('')
     const verifyInput = ref(null)
+    const code = ref()
 
     function getUserName($event){
         userName.value = $event.target.value
     }
 
-/*
+
     const getVerifyNum = async () => {
         try {
-            const response = await axios.post('/api/sms/send', null, {
+            const response = await axios.post(`${host}/api/sms/send`, null, {
                 params: {
                     phoneNumber: phoneNumber.value,
-                }
+                },
+                headers: {
+                    "Content-Type":"application/json"
+                },
             })
             verifyInput.value.disabled = false
+            alert('인증문자가 전송되었습니다.')
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-*/
+
     const getID = async (id) => { 
         const response = await axios.get(`https://api.example.com/users/${id}`) // id값으로 무엇을쓸건지?(name or user.id)
         return response.data
     }
-/*
+
     const isVerifyNumCorrect = async () => {
         try {
-            const response = await axios.post('/api/sms/verify', {
+            const response = await axios.post(`${host}/api/sms/verify`, {
                 phoneNumber : phoneNumber.value,
-                code: verifyInput.value,
+                code: code.value,
             })
             alert(response.data.message)
         } catch (error) {
             console.error('에러 발생:', error)
         }
         try {
-            const response = await axios.post('/api/user/find/email', {
+            const res = await axios.post(`${host}/api/user/find/email`, {
                 name: userName.value,
                 phoneNumber : phoneNumber.value,
             })
-            ID.value = response.data.message
+            ID.value = res.data.result
+            isOpen.value = false
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-        */
+
 </script>
 <style>
     

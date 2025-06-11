@@ -19,12 +19,12 @@
                 <div v-for="(item, index) in items" :key="item.question" class="flex flex-col text-start">
                     <div class="flex justify-between items-baseline mb-2 ">
                         <p class="w-11/12 mr-2 text-sm font-bold break-all">{{ index+1 }}. {{ item.question }}</p>
-                        <button @click="questionDelete(index)" class="size-[14px] m-2">
+                        <button @click="questionDelete(index)" class="size-[16px] m-2">
                             <img src="../assets/carbon_trash-can.svg" alt="" class="size-full">
                         </button>
                     </div>
                     <div class="relative rounded-md mb-2">
-                        <textarea :id="item.question" @click="modifyAndBackup(item.question, index)" @input="resize($event, index)" spellcheck="false"
+                        <textarea :id="item.question" @click="backup(item.question, index)" @input="resize($event, index)" spellcheck="false"
                             class="w-full h-px px-3 py-3 rounded-md text-[11px] resize-none overflow-y-hidden min-h-[40px] border border-gray-200 focus:outline outline-btnBlue" 
                             ></textarea>
                         <div class="absolute bottom-[18px] right-2 text-[10px]">{{ nowText[index].length }} / 3000</div> 
@@ -60,7 +60,7 @@
     import {ref, reactive, onMounted} from 'vue'
     import SelfIntro_fileModal from './SelfIntro_fileModal.vue'
     import SelfIntro_evalModal from './SelfIntro_evalModal.vue'
-    import { resume_items } from '../data/defaultQuestions'
+    import { resumeItems } from '../data/defaultQuestions'
     import env from '../api/env'
 
     // const applicationId = ref(0) -> '검사하기' 버튼을 누르면 자기소개서에 해당하는 공고ID(application_id) 가 필요함
@@ -75,16 +75,18 @@
     })
 */
     //const resumeId = ref(0)  // 여기다 복사
-    const items = reactive([...resume_items]) // 이건 그대로 사용
+    const items = reactive([...resumeItems]) // 이건 그대로 사용
     
     const nowText = reactive(Array(items.length).fill(''))
     const beforeText = reactive(Array(items.length).fill(''))
+    const isBtOpen = reactive(Array(items.length).fill(false))
+
     const addQuestion = ref('')
     const backupHeight = ref(0)
     const isOpenFile = ref(false)
     const isOpenEval = ref(false)
     const isOpenAdd = ref(false)
-    const isBtOpen = reactive(Array(items.length).fill(false))
+    
 
     function resize(event, index){
         nowText[index] = event.target.value
@@ -98,7 +100,8 @@
         event.target.style.height = '1px'
         event.target.style.height = event.target.scrollHeight + 'px'
     }
-    function modifyAndBackup(id, index){ // 수정/취소 버튼 open
+
+    function backup(id, index){ // 수정/취소 버튼 open
         backupHeight.value = document.getElementById(id).style.height
         beforeText[index] = nowText[index]
         isBtOpen[index] = true

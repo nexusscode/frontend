@@ -8,7 +8,13 @@ export const useUserStore = defineStore('user', {
     userName: '로그인',
     isLoggedIn : false,
     isDisced: false,
+    isDeved: false,
   }),
+  getters: {
+    isSurveyed() {
+      return state.isDisced && state.isDeved
+    },
+  },
   actions: {
     login(data) {
       this.userId = data.userId;

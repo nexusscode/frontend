@@ -3,9 +3,9 @@
         <div name="modal_box" class="flex flex-col justify-between items-start w-[600px] min-w-[500px] h-[550px] px-14 py-6 mt-10 rounded-2xl bg-white">
             <div class="pb-1 text-start text-base font-extrabold">회원가입</div>
             <div class="w-full flex items-baseline">
-                <div class="w-1/5 text-start text-sm font-semibold">아이디</div>
+                <div class="w-1/5 text-start text-sm font-semibold">이메일</div>
                 <input type="text" v-model="userEmail" placeholder="이메일을 입력하세요" class="w-3/5 pl-4 py-1.5 border rounded-md font-normal">
-                <button class="w-1/6 py-1.5 ml-3 rounded-md border-btnBlue text-btnBlue">중복확인</button> <!--api-->
+                <button @click="checkEmail" class="w-1/6 py-1.5 ml-3 rounded-md border-btnBlue text-btnBlue">중복확인</button> <!--api-->
             </div>
             <div class="w-full flex items-baseline">
                 <div class="w-1/5 text-start text-sm font-semibold">비밀번호</div>
@@ -49,7 +49,7 @@
                     <label for="info-agree" class="flex items-center"><input type="checkbox" id="info-agree" value="info-agree" v-model="agrees" class="mr-2">개인정보수집 동의 (필수)</label>
                 </div>
             </div>
-            <button @click="createUser;$emit('close')" class="self-center px-10 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white"> <!--api-->
+            <button @click="createUser" class="self-center px-10 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white"> <!--api-->
                 회원가입
             </button>
         </div>
@@ -58,15 +58,17 @@
 <script setup>
     import {ref, reactive, computed} from 'vue';
     import axios from 'axios';
-    import { API_SERVER_HOST } from '../../api/host';
+    import { API_SERVER_HOST } from '@/api/host';
     import { useRouter } from 'vue-router';
 
+    const emit = defineEmits(['close'])
+
     const host = `${API_SERVER_HOST}`
-    const router = useRouter()
 
     const userName = ref('')
     const userEmail = ref('')
     const userPW = ref('')
+    const canUseEmail = ref(false)
     const isPWEqual = ref(false)
     const phonefirstnum = ref('')
     const phonesecondnum = ref('')
@@ -109,14 +111,30 @@
     }
 */
 
+    const checkEmail = async () => {
+        try {
+            if(!userEmail.value){
+                alert('이메일을 입력해주세요.')
+                return
+            }
+            const res = await axios.post(`${host}/api/user/signup`, {
+                params: {
+                    email: userEmail.value
+                }
+            })
+            canUseEmail.value = res.data.result
+        } catch (error) {
+            console.error('에러 발생:', error)
+        }
+    }
+
     const createUser = async () => {
         try {
             if(!isAllChecked){
                 alert('약관에 모두 동의해주세요.')
                 return
             }
-
-            const response = await axios.post(`${host}/api/user/signup`, {
+            await axios.post(`${host}/api/user/signup`, {
                 email: userEmail.value,
                 password: userPW.value,
                 name: userName.value,
@@ -124,7 +142,8 @@
                 devType: position.value,
                 experienceLevel: career.value,
             })
-            alert('회원가입 완료')
+            alert('회원가입이 완료되었습니다.')
+            emit('close')
         } catch (error) {
             console.error('에러 발생:', error)
         }

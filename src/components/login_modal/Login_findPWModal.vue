@@ -8,7 +8,7 @@
                 <input type="text" @input="getUserName" placeholder="이름을 입력해주세요" class="w-3/5 pl-4 py-1.5 border rounded-md font-normal">
             </div>
             <div class="w-full flex items-baseline">
-                <div class="w-1/5 text-start text-sm font-bold">아이디</div>
+                <div class="w-1/5 text-start text-sm font-bold">이메일</div>
                 <input type="text" v-model="userEmail" placeholder="이메일을 입력해주세요" class="w-3/5 pl-4 py-1.5 border rounded-md font-normal">
             </div>
             <div class="w-full flex items-baseline"> 
@@ -20,8 +20,8 @@
                     <button @click="getVerifyNum" class="w-full py-1.5 ml-3 rounded-md border-btnBlue text-btnBlue">인증코드 받기</button>
                 </div>
             </div>
-            <input type="text" ref="verifyInput" placeholder="인증번호 입력" disabled class="self-center w-3/5 pl-4 py-1.5 border rounded-md font-normal">
-            <button @click="isVerifyNumCorrect;isOpen=false" @keyup.enter="isOpen=false" class="self-center px-12 py-1.5 border mt-2 text-xs bg-[#4f89fd] rounded-md text-white"> <!--keyup 수정할것-->
+            <input type="text" ref="verifyInput" v-model="code" placeholder="인증번호 입력" disabled class="self-center w-3/5 pl-4 py-1.5 border rounded-md font-normal">
+            <button @click="isVerifyNumCorrect" @keyup.enter="isOpen=false" class="self-center px-12 py-1.5 border mt-2 text-xs bg-[#4f89fd] rounded-md text-white"> <!--keyup 수정할것-->
                 다음
             </button>
         </div>
@@ -36,36 +36,44 @@
     </div>
 </template>
 <script setup>
-    import {ref, reactive} from 'vue'
+    import axios from 'axios'
+    import {ref, computed} from 'vue'
+    import { API_SERVER_HOST } from '@/api/host';
+
+    const host = `${API_SERVER_HOST}`
     const isOpen = ref(true)
     const userName = ref('')
     const userEmail = ref('')
     const phonefirstnum = ref('')
     const phonesecondnum = ref('')
     const phonelastnum = ref('')
-  //  const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
+    const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
     const PW = ref('')
     const verifyInput = ref(null)
+    const code = ref()
 
     function getUserName($event){
         userName.value = $event.target.value
     }
 
 
-  /*
+  
     const getVerifyNum = async () => { // 어떤걸 보낼지 체크
         try {
-            const response = await axios.post('/api/sms/send', null, {
+            const response = await axios.post(`${host}/api/sms/send`, null, {
                 params: {
                     phoneNumber: phoneNumber.value,
-                }
+                },
+                headers: {
+                    "Content-Type":"application/json"
+                },
             })
             verifyInput.value.disabled = false
+            alert('인증문자가 전송되었습니다.')
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-*/
 
     const getPW = async (id) => { 
         try{
@@ -76,29 +84,29 @@
         }
     }
 
-    /*
+    
     const isVerifyNumCorrect = async () => {
         try {
-            const response = await axios.post('/api/sms/verify', {
+            const response = await axios.post(`${host}/api/sms/verify`, {
                 phoneNumber : phoneNumber.value,
-                code: verifyInput.value,
+                code: code.value,
             })
             alert(response.data.message)
         } catch (error) {
             console.error('에러 발생:', error)
         }
         try {
-            const response = await axios.post('/api/user/find/password', {
+            const response = await axios.post(`${host}/api/user/find/password`, {
                 email: userEmail.value,
                 name: userName.value,
                 phoneNumber : phoneNumber.value,
             })
-            PW.value = response.data.message
+            PW.value = response.data.result
+            isOpen.value = false
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-        */
 </script>
 <style>
     

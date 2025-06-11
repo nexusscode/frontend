@@ -15,34 +15,37 @@
             <div class="w-full flex items-baseline"><div class="w-1/5 text-start text-sm font-bold">희망분야</div>
                 <select name="" v-model="position" required class="relative w-[220px] border pl-3 py-1.5 rounded-md appearance-none font-normal">
                     <option disabled hidden selected value="">희망분야를 선택해주세요</option>
-                    <option value="">예시1</option>
-                    <option value="">예시2</option>
+                    <option value="백엔드">백엔드</option>
+                    <option value="프론트엔드">프론트엔드</option>
                 </select>
                 </div>
             <div class="w-full flex items-baseline"><div class="w-1/5 text-start text-sm font-bold">경력</div>
                 <select name="" v-model="career" required class="w-[70px] border pl-2 py-1.5 rounded-md appearance-none font-normal">
                     <option disabled hidden selected value="">경력</option>
-                    <option value="">예시1</option>
-                    <option value="">예시2</option>
+                    <option value="신입">신입</option>
+                    <option value="경력">경력</option>
                 </select>
             </div>
-            <button @click="updateUserInfo;$emit('close')" class="self-center px-12 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white">
+            <button @click="updateUserInfo" class="self-center px-12 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white">
                 수정
             </button>
         </div>
     </div>
 </template>
 <script setup>
-    import axios from 'axios';
-    import { users } from '@/data/dummyData'
-    import { ref } from 'vue';
-    import env from '../api/env'
+    import { ref, computed } from 'vue';
+    import env from '@/api/env'
+    import { useRouter } from 'vue-router';
+
+    const router = useRouter()
+
+    const emit = defineEmits(['close']) 
 
     const userName = ref('')
     const phonefirstnum = ref('')
     const phonesecondnum = ref('')
     const phonelastnum = ref('')
-  //  const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
+    const phoneNumber = computed (() => {return `${phonefirstnum.value}${phonesecondnum.value}${phonelastnum.value}`})
     const position = ref('')
     const career = ref('')
 
@@ -50,21 +53,21 @@
         userName.value = $event.target.value
     }
 
-     /*
+     
     const updateUserInfo = async () => {
         try {
-            const response = await env.put('/api/user', {
+            await env.put('/api/user', {
                 name: userName.value,
                 phoneNumber : phoneNumber.value,
                 devType: position.value,
                 experienceLevel: career.value,
             })
-            alert(response.data.message)
+            router.push('/') // 그냥 정보 수정 후 메인으로 보내버림 --> 그냥 닫으면 한 번 더 mypage.env를 실행해야함
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-*/
+
 </script>
 <style>
     select:required:invalid {

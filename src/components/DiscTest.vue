@@ -81,6 +81,7 @@
 import { discQuestions } from '../data/discQuestions'
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
+import { useUserStore } from "@/stores/user";
 import env from '../api/env'
 
 const router = useRouter()
@@ -135,7 +136,7 @@ function beforePost(){
 /* disc 검사 전송
 const answersPost = async () => { 
         try {
-            beforePost
+            beforePost()
             await env.put('/api/survey/disc', answersList.value)
             router.push({ name: 'DiscResult' })
         } catch (error) {
