@@ -6,14 +6,30 @@ import Navigator from './components/Navigator.vue'
 <template>
   <div class="font-sans">
     <Background />
-    <Navigator />
-    <div class="mt-10">
+    <Navigator v-if="showNav" />
+    <div class="">
       <router-view />
     </div>
   </div>
 
 
 </template>
+
+<script setup>
+import { useRoute } from 'vue-router';
+import { computed } from 'vue';
+import Background from './components/Background.vue'
+import Navigator from './components/Navigator.vue'
+import SelfIntroResult from './components/SelfIntroResult.vue';
+import InterviewInfo from './components/InterviewInfo.vue';
+import Login from './components/Login.vue';
+
+const route = useRoute();
+const hiddenNames = ['Interview']; // 네비게이션 없는 페이지
+
+const showNav = computed(() => !hiddenNames.includes(route.name));
+
+</script>
 
 <style scoped>
   #app {

@@ -7,6 +7,14 @@ import Community from '@/components/Community.vue'
 import MyPage from '@/components/MyPage.vue'
 import SelfIntro from '@/components/SelfIntro.vue'
 import Interview from '@/components/Interview.vue'
+import InterviewResult from '@/components/InterviewResult.vue'
+import SurveyFirst from '@/components/SurveyFirst.vue'
+import SurveyFirstResult from '@/components/SurveyFirstResult.vue'
+import DiscTest from '@/components/DiscTest.vue'
+import DiscResult from '@/components/DiscResult.vue'
+import DevTest from '@/components/DevTest.vue'
+import DevResult from '@/components/DevResult.vue'
+import RecruitInfo from '@/components/RecruitInfo.vue'
 
 const routes = [
   { path: '/', name: 'Main', component: MainPage },
