@@ -9,12 +9,12 @@
             </div>
             <div class="w-5/6 flex flex-col text-start justify-around"> 
               <div class="flex items-center mb-1">
-                <div class="text-lg font-bold">{{ user.name }}님</div>
+                <div class="text-lg font-bold">{{ userInfo.name }}님</div>
                 <button @click="isOpenUpdate=true" class="px-2.5 py-0.5 border border-gray-300 mx-6 bg-white text-xs rounded-sm">수정</button>
-                <MyPage_UpdateModal v-if = "isOpenUpdate" @close="isOpenUpdate=false"/>
+                <MyPage_UpdateModal v-if = "isOpenUpdate" @close="isOpenUpdate = false"/>
               </div>
-              <div class="flex items-center"><div class="w-1/6">희망분야</div><div class="w-1/5 pr-12">{{ user.devType }}</div><div class="w-1/5">DISC 유형</div><div class="w-auto text-btnBlue">{{ discResult.discType }}유형 </div><button class="text-black text-[11px] ml-2 underline">(재검사하기)</button></div>
-              <div class="flex items-center"><div class="w-1/6">경력</div><div class="w-1/5 pr-12">{{ user.experienceLevel }}</div><div class="w-1/5">개발자 성향</div><div class="w-auto text-btnBlue">{{ devResult.devType }} </div><button class="text-black text-[11px] ml-2 underline">(재검사하기)</button></div>
+              <div class="flex items-center"><div class="w-1/6">희망분야</div><div class="w-1/5 pr-12">{{ userInfo.devType }}</div><div class="w-1/5">DISC 유형</div><router-link to="/discresult" class="w-auto text-btnBlue">{{ discResult.discType }}유형 </router-link><router-link to="/disctest" class="text-black text-[11px] ml-2 underline">(재검사하기)</router-link></div>
+              <div class="flex items-center"><div class="w-1/6">경력</div><div class="w-1/5 pr-12">{{ userInfo.experienceLevel }}</div><div class="w-1/5">개발자 성향</div><router-link to="/devresult" class="w-auto text-btnBlue">{{ devResult.devType }} </router-link><router-link to="/devtest" class="text-black text-[11px] ml-2 underline">(재검사하기)</router-link></div>
             </div>
           </div>
           <div class="w-1/3 flex justify-end">
@@ -54,11 +54,15 @@
     import MyPage_UpdateModal from './MyPage_UpdateModal.vue'
     import {ref, reactive, onBeforeMount, onMounted} from 'vue'
     import env from '@/api/env'
-    import { users } from '@/data/dummyData'
+    import { useUserStore } from "@/stores/user";
+
+    const user = useUserStore()
 
     const isOpenUpdate = ref(false)
-    const user = reactive({})
-    const discResult = reactive({})
+    const userInfo = reactive({})
+    const discResult = reactive({
+
+    })
     const devResult = reactive({})
     const recentResume = reactive({})
     const recentInterview = reactive({})
@@ -79,38 +83,42 @@
 
 
     onMounted(async () => {
+
+      const requests = []
+
+      requests.push(env.get('/api/user')) // 항상 실행
+
+      if (user.isDisced) {
+        requests.push(env.get('/api/survey/disc/result'))
+      }
+
+      if (user.isDeved) {
+        requests.push(env.get('/api/survey/dev/result'))
+      }
+      
       try {
-    const [userRes, discResultRes, devResultRes, recentResumesRes, recentInterviewsRes, feedbackCountsRes] = await Promise.all([
-      axios.get('/api/user'),
-      axios.get('/api/survey/disc/result'),
-      axios.get('/api/survey/dev/result'),
-      axios.get('/api/application/resume/recent'),
-      axios.get('/api/interview/recent'),
-      axios.get('/api/user/feedback-count'),
-    ])
+    const res = await Promise.all(requests)
 
-    Object.assign(user, userRes.data.result)
-    Object.assign(discResult, discResultRes.data.result)
-    Object.assign(devResult, devResultRes.data.result)
-    Object.assign(recentResume, recentResumesRes.data.result)
-    Object.assign(recentInterview, recentInterviewsRes.data.result)
-    Object.assign(feedbackCounts, feedbackCountsRes.data.result)
+    Object.assign(userInfo, res[0].data.result)
 
-    recentResume.modifiedAt = changeDayFormat(recentResume.modifiedAt)
-    recentInterview.createdAt = changeDayFormat(recentInterview.createdAt)
+    if (user.isDisced) {
+         Object.assign(discResult, res[1].data.result)
+      }
+
+      if (user.isDeved) {
+        Object.assign(devResult, res[2].data.result)
+      }
   } catch (error) {
     console.error('데이터 로딩 에러:', error)
   }
 })
-    
-
+/*
     onBeforeMount(async () => {
         try {
-            const response = await env.get(`/api/user`)
-            Object.assign(user, response.data.result)
+            
         } catch (err) {
             console.error('API 오류:', err)
         }
     })
-    
+    */
   </script>

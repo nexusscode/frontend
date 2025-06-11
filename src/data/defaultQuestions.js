@@ -1,4 +1,4 @@
-export const resume_items = [
+export const resumeItems = [
         {
             question: "입사하고 싶은 이유와 준비 과정을 구체적으로 작성해주세요.",
             answer: "",

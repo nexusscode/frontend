@@ -1,7 +1,7 @@
 <template>
-    <div class="absolute top-32 mx-36">
-        <div name="main_box" class="flex w-11/12 px-3 py-6 border mx-auto rounded-3xl bg-white/30">
-            <div class="w-3/4 mr-10">
+    <div class="h-screen-minus-84 mt-28 mx-36">
+        <div name="main_box" class="flex w-11/12 px-3 py-6 border mx-auto rounded-t-3xl bg-white/30">
+            <div class="w-3/4 mr-7">
                 <div class="h-8 flex justify-between text-xs">
                     <div>
                         <p class="pl-4 text-lg font-semibold inline">자소서 분석 결과</p>
@@ -14,7 +14,7 @@
                     <div v-for="(item, index) in items" :key="item.resumeItemId" class="flex flex-col text-start">
                         <div class="flex justify-between items-baseline mb-2">
                             <p class="w-full pl-1 text-sm font-semibold">{{ index+1 }}. {{ item.question }}</p>
-                            <button @click="questionDelete(index)" :disabled="isDisabled" class="size-[14px] m-2">
+                            <button @click="questionDelete(index)" :disabled="isDisabled" class="size-[16px] mx-2">
                                 <img src="../assets/carbon_trash-can.svg" alt="" class="size-full">
                             </button>
                         </div>
@@ -61,7 +61,7 @@
                     <p v-for="(feedbackItem, index) in feedbackItems"
                         :key="feedbackItem.feedbackId"
                         :ref="el => targetRefs[index] = el"
-                        :class="['p-4 shadow-sm border border-gray-200 bg-white font-semibold text-[11px] rounded-xl', feedbackCount[index] === 1 ? 'text-btnBlue' : 'text-[#4906e6]']">
+                        :class="['p-4 shadow-sm border border-gray-200 font-semibold text-[11px] rounded-xl', feedbackCount[index] < 1 ? 'bg-none border-none shadow-none' : (feedbackCount[index] > 1 ? 'text-[#4906e6] bg-white' : 'text-btnBlue bg-white')]">
                         {{ feedbackItem.feedbackText }}
                     </p>
                 </div>
@@ -114,6 +114,7 @@
     const isOpenInterview = ref(false)
     const isOpenAdd = ref(false)
     const isDisabled = ref(true)
+    const isFirstFeedback = ref(false)
 
     onMounted(async () =>{
         await nextTick()
@@ -148,10 +149,9 @@
         updateLinePosition()
     })
 
-
     function updateLinePosition(){
         lines.forEach(line => {
-            if (line.position) line.position() // LeaderLine의 위치 재계산
+            if (line) line.position() // LeaderLine의 위치 재계산
         })
     }
 
@@ -202,18 +202,21 @@
     function questionInsert(){
         if(!addQuestion.value) return
         items.push({
-            resumeItemId: 55,
+            resumeItemId: 55,  // 여기는 ID 생성을 못함 -> api써야겠지?
             resumeId: 1,
-            question: addQuestion.value,  // 여기는 ID 생성을 못함 -> 수정 요망
+            question: addQuestion.value, 
             answer: '',
             aiCount: 0,
         })
         nowText.push('')
         beforeText.push('')
         isBtOpen.push(false)
-
+        sourceRefs.value.push(null)
+        targetRefs.value.push(null)
+        lines.push(null)
         isOpenAdd.value = false
         addQuestion.value = ''
+        feedbackCount.push(0)
     }
 
     function questionInsertCancel(){
@@ -232,16 +235,41 @@
         feedbackItems.splice(index,1)
         sourceRefs.value.splice(index,1)
         targetRefs.value.splice(index,1)
+        feedbackCount.splice(index,1)
     }
 
     function copyResume(index){
         items[index].answer = nowText[index]
     }
 
+    let it = 0
+
+    const beforeFeedback = (index) => {
+        if(items[index] && !feedbackItems[index])  {
+            for(let i = 0; i< items.length - feedbackItems.length; i++) {feedbackItems.push({
+                feedbackId: it - 1,
+                resumeItemId : 5,
+                feedbackText : '',
+            })
+            it--
+        }
+    }
+    }
+
     const feedback = async (index) => {
-        /*
-        if(!feedbackItems[index]) { feedbackItems.push('')
         
+        beforeFeedback(index)
+
+        feedbackItems[index] = { // dom 생성, api 써야겠지?
+            feedbackId: 555 + index,
+            resumeItemId : 5,
+            feedbackText: '아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요',
+        }
+        
+        feedbackCount[index]++
+
+        await nextTick()
+        if(lines[index] == null){
         const line = new LeaderLine(
                 sourceRefs.value[index],
                 targetRefs.value[index],
@@ -252,16 +280,13 @@
                     size: 1,
                 }
             )
-            lines.push(line)
+            lines[index] = line
         }
-            */
-        feedbackItems[index].feedbackText = '우히히히닣닣미히닌히히히시'
-         await nextTick()
     }
     /*
     const feedbackResumeItem = async (index) => { // (검사) 버튼 누르면 피드백 가져오기
         try {
-            if(items.length > feedbackItemss.length) feedbackItemss.push('') // 2개이상을 생성한 후 이후의 것을 검사하면 이전의 것은 적용 x --> 수정가능?
+            if(items.length > feedbackItemss.length) feedbackItemss.push('') 
             item.question = items[index].question
             item.answer = nowText[index]
             const res = await env.post(`/api/resume/feedback/${items[index].resumeItemId}`, item) 
