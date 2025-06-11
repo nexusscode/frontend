@@ -8,30 +8,38 @@
         <div class="nav-item absolute left-1/2 transform -translate-x-1/2">
             <router-link to="/recruit" class="mr">AI 검사</router-link>
             <router-link to="/savedrecord" class="mr">보관함</router-link>
-            <router-link to="interviewinfo/">실제 면접</router-link>
+            <router-link to="/interviewinfo">실제 면접</router-link>
         </div>
         
         <div class="nav-item">
-            <span class="mr-4"> {{ user.userName }} </span>   <!-- 나중에 수정-->
-            <router-link :to = "(user.userName === '로그인') ? '/login' : '/mypage'" class="flex items-center">
+          <div>
+            <router-link v-if="isGuest" to="/login" class="">
+              {{ user.userName }}
+            </router-link>
+            <span v-else class="mr-4">
+              {{ user.userName }}
+            </span>
+          </div>
+          <div>
+            <router-link v-if="!isGuest" to="/mypage" class="flex items-center">
               마이페이지
               <img src="../assets/mypage_icon.svg" class="w-4 h-4 ml-1" alt="" />
             </router-link>
+          </div>
+            
         </div>
     </nav>
 
 </template>
 <script setup>
-  import {ref} from 'vue'
+  import { computed } from 'vue'
   import { useUserStore } from '../stores/user';
-import { createPinia, setActivePinia } from 'pinia'
+  import { createPinia, setActivePinia } from 'pinia'
 
-const pinia = createPinia()
-setActivePinia(pinia)
-
+  const pinia = createPinia()
+  setActivePinia(pinia)
   const user = useUserStore()
-  const route = (user.userName === '로그인') ? "/login" : "/mypage"
-
+  const isGuest = computed(() => user.userName === '로그인')
 </script>
 
 <style scoped>
@@ -48,7 +56,7 @@ setActivePinia(pinia)
   z-index: 40;
   backdrop-filter: blur(100px); /* 백드롭 필터 - 네비게이션 블러 처리 */
 }
-.nav-item { /* 알약 모양 도형형 */
+.nav-item { /* 알약 모양 도형 */
   display: flex;
   padding: 10px 25px;
   background-color: rgba(255, 255, 255, 0.6);
@@ -58,9 +66,10 @@ setActivePinia(pinia)
   align-items: center;
 }
 
-.nav-item span { /* span 간격 조정 */
+/* span 간격 조정 */
+/* .nav-item span { 
   margin-right: 20px;
-}
+} */
 
 .nav-item a { /* 링크 스타일 변경 */
   text-decoration: none; 
