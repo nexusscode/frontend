@@ -1,4 +1,5 @@
 <!-- AI 검사 탭 : 공고들 목록 -->
+ 
 <template>
     <div class="h-screen-minus-84 flex mt-10 ml-20 mr-20 px-8"> <!-- relative mt-8 top-10 min-h-[calc(100vh-84px)] -->
     <div class="ml-36 mr-36 flex-1 flex flex-col justify-between h-[calc(100vh-145px)]">
