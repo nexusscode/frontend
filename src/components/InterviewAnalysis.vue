@@ -7,7 +7,7 @@
         style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);"
     >
         <span class="font-bold text-xl">AI 면접관의 총평</span>
-        <span class="font-medium text-xl ">{{ interviewSum?.summary }}</span>
+        <span class="font-medium text-xl ">{{ interview?.overallAssessment }}</span>
     </div>
   
     <!-- 미완결 답변, 블라인드 위반 -->
@@ -15,7 +15,7 @@
         <div class="w-1/2 py-1 flex gap-x-1 items-start">
             <span class="font-semibold text-xl items-start mr-4">미완결 답변</span>
             <div class="flex flex-1 flex-wrap gap-x-1 gap-y-1">
-                <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">1</span>
+                <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">{{ interview?.notCompleteAnswer }}</span>
                 <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">12</span>
             </div>
         </div>
@@ -24,7 +24,7 @@
         <div class="w-1/2 py-1 flex gap-x-1 items-start">
             <span class="font-semibold text-xl items-start ml-3 mr-5">블라인드 위반</span>
             <div class="flex flex-1 flex-wrap gap-x-1 gap-y-1">
-                <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">경기대학교</span>
+                <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">{{ interview?.blindList }}</span>
                 <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">수원</span>
             </div>
         </div>
@@ -34,7 +34,7 @@
     <div class="flex flex-col gap-y-4 w-full mb-12">
       <span class="font-semibold text-xl">이전응시 비교</span>
       <div class="flex bg-white w-full p-8 rounded-2xl">
-        <span class="font-medium text-xl ">이전 응시 여기 어떻게 할지 생각해봐야함</span> 
+        <span class="font-medium text-xl ">{{ interview?.comparisonWithPrevious }}</span> 
       </div> <!-- 여기 수정 필요 -->
     </div>
 
@@ -100,16 +100,15 @@
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">업무 성향</span>
             <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
-            
+                <span class="font-medium text-xl">{{ interview?.workAttitude }}</span>
+
             </div>
         </div>
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">개발자 스타일</span>
             <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
+                <span class="font-medium text-xl">{{ interview?.developerStyle }}</span>
+                
             
             </div>
         </div>
@@ -121,16 +120,14 @@
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">강점</span>
             <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
+                <span class="font-medium text-xl">{{ interview?.strengths }}</span>
             
             </div>
         </div>
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">약점</span>
             <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
-                <span class="font-medium text-xl">• 일을 시작하기 전, </span>
+                <span class="font-medium text-xl">{{ interview?.weaknesses }}</span>
             
             </div>
         </div>
@@ -153,10 +150,52 @@ import {
   PointElement,
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore()
 const props = defineProps({
-  sessionId: String
+  sessionId: String,
+  applicationId: String
 })
+const interview = ref([]) // 면접 세션
+const item = ref([]) // 공고
+
+async function fetchInterview() { // 면접 세션 정보 가져오기
+  try {
+    const response = await env.get(`/api/interview/${sessionId}/detail`, {
+      params: {
+        sessionId: sessionId,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    interview.value = response.data.result
+
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+onMounted(fetchInterview);
+
+async function fetchApp() { // 공고 가져오기 
+    try {
+        const response = await env.get(`/api/application/${applicationId}`, {
+            params: {
+                userId: parseInt(userStore.userId),
+                applicationId : applicationId
+            }
+        });
+        item.value = response.data.result;
+    } catch (err) {
+        console.error('공고 상세 조회 실패:', err)
+    }
+}
+onMounted(fetchApp);
+
+
+
+
+
 
 // 답변 관련 임시 데이터들 -> 나중에 수정
 const seconds = [60, 85, 160, 50, 35, 70, 25, 55, 60, 40]
@@ -180,10 +219,10 @@ function getPosition(index) {
 }
 
 const interviewSession = computed(() => interview_sessions.find(i => i.id === props.sessionId)) // 면접 세션
-const item = computed(() => { // 공고
-  const itemId = interviewSession.value?.application_id
-  return allItems.find(i => i.id === itemId)
-})
+// const item = computed(() => { // 공고
+//   const itemId = interviewSession.value?.application_id
+//   return allItems.find(i => i.id === itemId)
+// })
 const interviewSum = computed(() => { // 면접 요약
   return interview_summary.find(i => i.session_id === props.sessionId)
 })
@@ -209,8 +248,10 @@ const Sessions = computed(() => { // 같은 공고의 면접 세션들
 // 답변 초를 분으로 변경
 const minutes = seconds.map(sec =>  parseFloat((sec / 60).toFixed(1)))
 // console.log(minutes)
-const totalSeconds = seconds.reduce((sum, sec) => sum + sec, 0); 
-const avgSeconds = totalSeconds / seconds.length; // 평균 초
+// const totalSeconds = seconds.reduce((sum, sec) => sum + sec, 0); 
+const totalSeconds = interview.countSeconds
+// const avgSeconds = totalSeconds / seconds.length; // 평균 초
+const avgSeconds = totalSeconds / interview.totalCount; // 평균 초
 const avgMinutes = Math.floor(avgSeconds / 60); // 평균 분
 const avgRemainingSeconds = Math.round(avgSeconds % 60); // 평균_나머지 초
 

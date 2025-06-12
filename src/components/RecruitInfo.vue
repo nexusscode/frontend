@@ -110,16 +110,16 @@
 
                         <div class="flex flex-col">
                             <span class="flex text-sm w-full h-5 font-medium text-black mb-2">진행한 면접 내역</span>
-                            <div v-if="interview?.length > 0" class="flex w-full gap-x-2">
+                            <div v-if="interview?.length > 0" class="flex w-full gap-x-2 overflow-x-auto">
                                 <div 
                                     v-for="(item, index) in interview"
                                     :key="index"
                                     class="relative shadow-md flex justify-center w-1/3 border border-btnBlue rounded-xl"
+                                    @click="gotoInterviewResult"
                                 >
                                     <div
                                         class="w-32 h-12 flex my-7 mx-2 blur-sm"
                                         style="border-radius: 50%; background: radial-gradient(circle at center, #A5C7FF 0%, #FFFFFF 100%);"
-                                        @click="gotoInterviewResult"
                                     >
                                     </div>
                                     <span class="w-full px-3 text-left text-sm font-medium top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute">
@@ -189,7 +189,12 @@ const applicationId = Number(route.params.id) // 공고 id값
 // 공고 가져오기 
 async function fetchApp() {
     try {
-        const response = await env.get(`/api/application/${applicationId}`);
+        const response = await env.get(`/api/application/${applicationId}`, {
+            params: {
+                userId: parseInt(userStore.userId),
+                applicationId : applicationId
+            }
+        });
         item.value = response.data.result;
         memo.value = response.data.result.memo || '';
     } catch (err) {
@@ -277,7 +282,7 @@ function gotoSelfIntroResult() {
 }
 function gotoInterviewResult() {
     const sessionId = interview.sessionId
-    router.push({ name: 'InterviewResult', params: { id : sessionId } });
+    router.push({ name: 'InterviewResult', params: { applicationId : applicationId, id : sessionId } });
 }
 
 

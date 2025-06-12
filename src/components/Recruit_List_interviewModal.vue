@@ -7,18 +7,18 @@
             <!-- 면접관 선택 -->
             <div class="flex justify-between mb-10">
                 <div
-                    v-for="(image, index) in Images"
-                    :key="index"
+                    v-for="image in Images"
+                    :key="image.key"
                     class="flex flex-col items-center cursor-pointer"
-                    @click="selectImage(index)"
+                    @click="selectImage(image.key)"
                 >
                     <img
                         :src="image.src"
                         :alt="image.alt"
                         class="w-50 h-50 rounded-full border-2 transition"
                         :class="{
-                        'border-[#5089FC] shadow-lg shadow-black/20': selectedImage === index,
-                        'border-transparent': selectedImage !== index
+                            'border-[#5089FC] shadow-lg shadow-black/20': selectedImage === image.key,
+                            'border-transparent': selectedImage !== image.key
                         }"
                     />
                     <p class="mt-2 text-base font-medium">{{ image.alt }}</p>
@@ -29,20 +29,20 @@
             <div class="grid grid-cols-2 gap-y-2 text-lg mb-10">
                 <div class="flex mr-12">
                     <span class="w-28 text-[#212121]">기업명</span>
-                    <span class="font-semibold">{{ Info.company_name }}</span>
+                    <span class="font-semibold">{{ Info.companyName }}</span>
                 </div>
                 <div class="flex ml-12">
-                    <span class="w-28 text-[#212121]">지원 직무</span>
-                    <span class="font-semibold">{{ Info.position }}</span>
+                    <span class="w-28 text-[#212121]">공고명</span>
+                    <span class="font-semibold">{{ Info.jobTitle }}</span>
                 </div>
 
                 <div class="flex mr-12">
                     <span class="w-28 text-[#212121]">경력</span>
-                    <span class="font-semibold">{{ Info.experience_level }}</span>
+                    <span class="font-semibold">{{ Info.experienceLevel }}</span>
                 </div>
                 <div class="flex ml-12">
                     <span class="w-28 text-[#212121]">공고생성날짜</span>
-                    <span class="font-semibold">{{ Info.created_at }}</span>
+                    <span class="font-semibold">{{ formatDate(Info.createdAt) }}</span>
                 </div>
             </div>
 
@@ -75,54 +75,70 @@
     </div>
   </template>
   
-  <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  import interviewerIMG1 from '@/assets/interviewerKind.svg'
-  import interviewerIMG2 from '@/assets/interviewerPleasant.svg'
-  import interviewerIMG3 from '@/assets/interviewerCool.svg'
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import interviewerIMG1 from '@/assets/interviewerKind.svg'
+import interviewerIMG2 from '@/assets/interviewerPleasant.svg'
+import interviewerIMG3 from '@/assets/interviewerCool.svg'
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
 
-  const router = useRouter()
+const userStore = useUserStore()
+const router = useRouter()
 
-  const Props = defineProps({
+const Props = defineProps({
     Info: {
         type: Object,
         required: true
     }
-  })
+})
 
-  const Images = [
-    { src: interviewerIMG1, alt: '친절하고 따뜻한' },
-    { src: interviewerIMG2, alt: '유쾌한' },
-    { src: interviewerIMG3, alt: '논리적이며 냉철한' }
-  ]
-  const selectedImage = ref(0) // 면접관 기본 : 친절한 면접관 
-  const selectImage = (index) => {
-    selectedImage.value = index
-  }
+const Images = [
+    { key: 'ALLOY', src: interviewerIMG1, alt: '친절하고 따뜻한' },
+    { key: 'ECHO', src: interviewerIMG2, alt: '유쾌한' }, // 수정 필요 -> 없애던지, 사진으로 틀던지
+    { key: 'ONYX', src: interviewerIMG3, alt: '논리적이며 냉철한' }
+]
+const selectedImage = ref('ALLOY') // 면접관 기본 : 친절한 면접관 
+const selectImage = (key) => {
+    selectedImage.value = key
+}
 
-  const emit = defineEmits(['close']) // 모달 창 오픈 여부 결정
-  const close = () => emit('close')
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd}`;
+}
 
-  // 면접 보기 기능 
-  function gotoInterview() {
-    const query = { // 일단 안 씀 -. 수정 필요?
-        company_name: Props.Info.company_name,
-        position: Props.Info.position,
-        experience_level: Props.Info.experience_level,
-        date: Props.Info.created_at,
-        interviewer: selectedImage.value, // 면접관 인덱스 번호 넘김 (착함0, 유쾌1, 냉철2)
-    };
-    console.log('쿼리 : ', query);
+const emit = defineEmits(['close']) // 모달 창 오픈 여부 결정
+const close = () => emit('close')
 
-    // router.push({
-    //     path: '/interview',
-    //     query: query,
-    // });
-    router.push({ name: 'Interview', params: { sessionId : "interviewSession0", interviewerId : selectedImage.value }, });
-    // 여기 면접세션 0으로 임시 지정 -> 나중에 수정 필요
 
-  }
 
-  </script>
+
+// 면접 보기 기능 
+async function gotoInterview() {
+    try {
+        const response = await env.post('/api/interview/start', {
+                applicationId: Props.Info.applicationId,
+                interviewType: selectedImage.value
+            },
+            {params: {
+                userId: parseInt(userStore.userId)
+            }
+        })
+        console.log(response.data.message)
+        const sessionId = response.data.result
+        // console.log("item 길이 : " + items.value.length)
+        // console.log("items : " + items.value)
+        router.push({ name: 'Interview', params: { applicationId : Props.Info.applicationId, id : sessionId } });
+    } catch (err) {
+        console.error('데이터 보내기 실패:', err)
+    }
+}
+
+
+</script>
   
