@@ -66,11 +66,6 @@
   align-items: center;
 }
 
-/* span 간격 조정 */
-/* .nav-item span { 
-  margin-right: 20px;
-} */
-
 .nav-item a { /* 링크 스타일 변경 */
   text-decoration: none; 
   color: #000000;
