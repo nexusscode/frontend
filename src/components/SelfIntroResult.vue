@@ -117,7 +117,7 @@
             const temp = res.data.result
             selectedItem.value = {
                 companyName : temp.companyName,
-                jobTitle : temp.jobTitle,
+                position : temp.position,
                 experienceLevel : temp.experienceLevel,
                 createdAt : temp.createdAt,
             }
