@@ -16,7 +16,6 @@
             <span class="font-semibold text-xl items-start mr-4">미완결 답변</span>
             <div class="flex flex-1 flex-wrap gap-x-1 gap-y-1">
                 <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">{{ interview?.notCompleteAnswer }}</span>
-                <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">12</span>
             </div>
         </div>
         <!-- 세로선 -->
@@ -25,7 +24,6 @@
             <span class="font-semibold text-xl items-start ml-3 mr-5">블라인드 위반</span>
             <div class="flex flex-1 flex-wrap gap-x-1 gap-y-1">
                 <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">{{ interview?.blindList }}</span>
-                <span class="inline-block px-2 font-medium rounded-lg bg-[#E5E5E5]">수원</span>
             </div>
         </div>
     </div>
@@ -35,7 +33,7 @@
       <span class="font-semibold text-xl">이전응시 비교</span>
       <div class="flex bg-white w-full p-8 rounded-2xl">
         <span class="font-medium text-xl ">{{ interview?.comparisonWithPrevious }}</span> 
-      </div> <!-- 여기 수정 필요 -->
+      </div> 
     </div>
 
      <!-- 답변 시간 -->
@@ -85,9 +83,8 @@
 
             <div class="ml-12 flex items-center">
                 <span class="font-semibold text-xl">
-                {{  }}라는 접속어를 반복적으로 사용하는 경향이 있습니다. <br/>
-                문장 연결 시에는 
-                <!-- 여기 어떤 식으로 작동하는지 알아야함 -> 수정 필요 -->
+                {{ interview?.vocabularyEvaluation.repeatedWordsSummary }} <br/>
+                
                 </span>
             </div>
         </div>
@@ -99,14 +96,14 @@
         <span class="font-semibold text-xl">스타일 분석</span>
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">업무 성향</span>
-            <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
+            <div class="flex flex-col gap-y-3 ml-3"> 
                 <span class="font-medium text-xl">{{ interview?.workAttitude }}</span>
 
             </div>
         </div>
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">개발자 스타일</span>
-            <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
+            <div class="flex flex-col gap-y-3 ml-3">
                 <span class="font-medium text-xl">{{ interview?.developerStyle }}</span>
                 
             
@@ -119,14 +116,14 @@
         <span class="font-semibold text-xl">강점 & 약점</span>
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">강점</span>
-            <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
+            <div class="flex flex-col gap-y-3 ml-3"> 
                 <span class="font-medium text-xl">{{ interview?.strengths }}</span>
             
             </div>
         </div>
         <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
             <span class="font-semibold text-xl">약점</span>
-            <div class="flex flex-col gap-y-3 ml-3"> <!-- 여기 수정 필요 + for문으로  +  -->
+            <div class="flex flex-col gap-y-3 ml-3"> 
                 <span class="font-medium text-xl">{{ interview?.weaknesses }}</span>
             
             </div>
@@ -137,7 +134,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watchEffect } from 'vue'
 import { allItems, interview_sessions, interview_questions, interview_answers, interview_summary } from '@/data/dummyData'
 import {
   Chart as ChartJS,
@@ -163,29 +160,27 @@ const item = ref([]) // 공고
 
 async function fetchInterview() { // 면접 세션 정보 가져오기
   try {
-    const response = await env.get(`/api/interview/${sessionId}/detail`, {
-      params: {
-        sessionId: sessionId,
-        userId: parseInt(userStore.userId)
-      }
-    })
+    const response = await env.get(`/api/interview/${props.sessionId}/detail`)
     interview.value = response.data.result
-
+    seconds.value = response.data.result.questions.map(q => parseInt(q.second))
+    totalSeconds.value = parseInt(interview.value.countSeconds)
+    totalCount.value = parseInt(interview.value.totalCount)
+    console.log("답변 초들 : " + seconds.value, "타입 확인:", seconds.value.map(s => typeof s))
+    console.log("interview : " + interview.value.title) 
+    console.log("totalSeconds : ", totalSeconds.value, "type:", typeof totalSeconds.value)
+    console.log("totalCount : ", totalCount.value, "type:", typeof totalCount.value)
   } catch (err) {
     console.error('데이터 불러오기 실패:', err)
   }
+  calculateAverageTime()
 }
 onMounted(fetchInterview);
 
 async function fetchApp() { // 공고 가져오기 
     try {
-        const response = await env.get(`/api/application/${applicationId}`, {
-            params: {
-                userId: parseInt(userStore.userId),
-                applicationId : applicationId
-            }
-        });
+        const response = await env.get(`/api/application/${props.applicationId}`);
         item.value = response.data.result;
+        console.log("item : " + item.value.companyName)
     } catch (err) {
         console.error('공고 상세 조회 실패:', err)
     }
@@ -193,12 +188,9 @@ async function fetchApp() { // 공고 가져오기
 onMounted(fetchApp);
 
 
-
-
-
-
 // 답변 관련 임시 데이터들 -> 나중에 수정
-const seconds = [60, 85, 160, 50, 35, 70, 25, 55, 60, 40]
+const seconds = ref([])
+// const seconds = [60, 85, 160, 50, 35, 70, 25, 55, 60, 40]
 const vocas = ['조금', '그리고', '그리고', '약간', '그러니까']
 
 function getPosition(index) {
@@ -246,23 +238,32 @@ const Sessions = computed(() => { // 같은 공고의 면접 세션들
 
 
 // 답변 초를 분으로 변경
-const minutes = seconds.map(sec =>  parseFloat((sec / 60).toFixed(1)))
+const minutes = seconds.value.map(sec =>  parseFloat((sec / 60).toFixed(1)))
 // console.log(minutes)
 // const totalSeconds = seconds.reduce((sum, sec) => sum + sec, 0); 
-const totalSeconds = interview.countSeconds
+// const totalSeconds = interview.value.countSeconds
+const totalSeconds = ref(1)
+const totalCount = ref(1)
+const avgSeconds = ref(0)
+const avgMinutes = ref(0)
+const avgRemainingSeconds = ref(0)
+const averageMinutes = ref('')
 // const avgSeconds = totalSeconds / seconds.length; // 평균 초
-const avgSeconds = totalSeconds / interview.totalCount; // 평균 초
-const avgMinutes = Math.floor(avgSeconds / 60); // 평균 분
-const avgRemainingSeconds = Math.round(avgSeconds % 60); // 평균_나머지 초
+function calculateAverageTime() {
+  avgSeconds.value = totalSeconds.value / totalCount.value; // 평균 초
+  avgMinutes.value = Math.floor(avgSeconds.value / 60); // 평균 분
+  avgRemainingSeconds.value = Math.round(avgSeconds.value % 60); // 평균_나머지 초
 
-const averageMinutes = avgMinutes >= 1
-  ? `${avgMinutes}분 ${avgRemainingSeconds}초`
-  : `${avgRemainingSeconds}초`;
-  
+  averageMinutes.value = avgMinutes.value >= 1
+    ? `${avgMinutes.value}분 ${avgRemainingSeconds.value}초`
+    : `${avgRemainingSeconds.value}초`;
+
+    console.log("averageMinutes : " + averageMinutes.value)
+}
 // const criteria = 1 // 판단 기준 
 const ud = // 20초보다 작으면 낮다, 40초보다 크면 높다로 설정함
-  avgSeconds < 20 ? '낮습' :
-  avgSeconds > 40 ? '높습' :
+  avgSeconds.value < 20 ? '낮습' :
+  avgSeconds.value > 40 ? '높습' :
   '비슷합';
 
 // 그래프
@@ -276,21 +277,23 @@ ChartJS.register(
   PointElement
 )
 
-const dataLength = Sessions.value.length;
+
 const isChartReady = ref(false)
-const chartData = {
-  labels: Array.from({ length: dataLength }, (_, i) => i + 1),
+const chartData = computed(() => {
+  return {
+  labels: Array.from({ length: totalCount }, (_, i) => i + 1),
   datasets: [
     {
       label: '',
-      data: seconds,
+      data: seconds.value,
       //answers.value.map(answer => new Number(answer.created_at)), // 수정 필요 -> 응답 시간 부분
       borderColor: 'rgba(80, 137, 252, 1)', // btnBlue
       backgroundColor: 'rgba(255, 255, 255, 1)',
       pointRadius: 0, 
     }
   ]
-}
+  }
+})
 
 const chartOptions = {
   responsive: true,
@@ -337,13 +340,12 @@ const chartOptions = {
   }
 }
 onMounted(() => {
-  try {
-    isChartReady.value = true
-  } catch (e) {
-    isChartReady.value = false
-  }
+  watchEffect(() => {
+    if (totalCount.value > 0 && seconds.value.length > 0) {
+      isChartReady.value = true
+    }
+  })
 })
-
 
 // console.log(interviewSum.value.id)
 // console.log('세션 ID:', props.sessionId)

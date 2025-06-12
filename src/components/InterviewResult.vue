@@ -98,14 +98,9 @@ const item = ref([]) // 공고
 
 async function fetchInterview() { // 면접 세션 정보 가져오기
   try {
-    const response = await env.get(`/api/interview/${sessionId}/detail`, {
-      params: {
-        sessionId: sessionId,
-        userId: parseInt(userStore.userId)
-      }
-    })
+    const response = await env.get(`/api/interview/${sessionId}/detail`)
     interview.value = response.data.result
-
+    console.log("interview : " + interview.value.title) 
   } catch (err) {
     console.error('데이터 불러오기 실패:', err)
   }
@@ -114,13 +109,9 @@ onMounted(fetchInterview);
 
 async function fetchApp() { // 공고 가져오기 
     try {
-        const response = await env.get(`/api/application/${applicationId}`, {
-            params: {
-                userId: parseInt(userStore.userId),
-                applicationId : applicationId
-            }
-        });
+        const response = await env.get(`/api/application/${applicationId}`);
         item.value = response.data.result;
+        console.log("item : " + item.value.companyName)
     } catch (err) {
         console.error('공고 상세 조회 실패:', err)
     }

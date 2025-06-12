@@ -34,6 +34,7 @@
             <div class="relative w-3/4 bg-hover2_bg flex justify-center items-center">
               <video
                 v-if="videoUrl"
+                :key="q_idx"
                 :src="videoUrl"
                 class="block w-full"
                 type="video/mp4"
@@ -44,7 +45,8 @@
               </video>
               <p v-else>로딩 중...</p>
               <audio 
-                v-if="ttsUrl" 
+                v-if="ttsUrl"
+                :key="q_idx" 
                 :src="ttsUrl"
                 autoplay 
                 type="audio/mp4">
@@ -172,7 +174,7 @@
           취소
         </button>
         <button 
-          @click="confirmEnd" 
+          @click="subscribeInterview" 
           class="px-10 py-1 bg-btnBlue text-lg font-medium text-white rounded-xl hover:bg-hover active:bg-pressed"
         >
           종료
@@ -261,6 +263,12 @@ async function fetchApp() { // 공고 가져오기
 onMounted(fetchApp);
 
 async function fetchQuestion() { // 질문 가져오기 기능
+    if (q_idx.value >= question.value?.countAll) { 
+      console.log("마지막 질문 완료 : " + q_idx.value);
+      endTime.value = elapsedTime.value;
+      showCompleteModal.value = true; // 면접 종료 확인 모달창
+      return;
+    }
   try {
     const response = await env.get(`/api/interview/${sessionId}/question`, {
       params: {
@@ -282,7 +290,7 @@ onMounted(fetchQuestion);
 
 async function fetchPresign() { // 답변 업로드용 s3접근 권한 presign 받아오기
   try {
-    const response = await env.get('/api/interview/voice-presign', {
+    const response = await env.get('/api/interview/voice-putpresign', {
       params: {
         fileName : fileName.value,
         userId: parseInt(userStore.userId)
@@ -539,9 +547,11 @@ const completeTranscript = async () => {
 
 async function postAnswer() { // 답변 저장
     try {
+        const link = "https://demo-my-testbucket-277707098184.s3.ap-northeast-2.amazonaws.com/upload/audio/"
+        const audiourl = `${link}${fileName}`
         const response = await env.post('/api/interview/interview-answer', {
                 questionId: question.value?.interviewQuestionId, 
-                audioUrl: audioUrl.value,
+                audioUrl: audiourl,
                 isCheated: false
             },
             {params: {
@@ -555,13 +565,18 @@ async function postAnswer() { // 답변 저장
 }
 
 const confirmEnd = () => { // 면접 종료
-  console.log("면접 종료 확인");
+  console.log("면접 종료 확인");  
   showCompleteModal.value = false;
-  
-  // 여기에 api 넘겨줘야함 -> 수정 필요
-
   router.push({ name: 'InterviewResult', params: { applicationId : applicationId, id : sessionId } });
 };
-
+async function subscribeInterview() {
+  try {
+    const response = await env.get(`/api/interview/subscribe/${sessionId}`)
+    console.log('생성 성공:', response.data.message)
+    confirmEnd()
+  } catch (error) {
+    console.error('생성 실패:', error)
+  }
+}
 
 </script>
