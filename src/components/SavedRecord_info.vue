@@ -88,7 +88,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { allItems, resumes, interview_sessions } from '@/data/dummyData' // 여기 수정 -> 보관함에 들어가있는 걸 가져오기
 import env from '@/api/env'
 import { useUserStore } from '@/stores/user'
 
@@ -124,7 +123,7 @@ async function fetchSInfo(page = 1) { // 보관된 실제 면접 전체 조회
 }
 onMounted(fetchSInfo);
 
-function gotoResult(reportMemoId) { // 수정 필요
+function gotoResult(reportMemoId) {
     router.push({ name: 'InterviewInfo', params: { id : reportMemoId } });
 }
 

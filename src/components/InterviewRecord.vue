@@ -2,17 +2,20 @@
 <template>
     <div class="flex flex-col">
         <div class="mb-8">
-            <!-- 여기도 for문으로 바꾸기 -->
+        <div
+            v-for="(question, index) in interview?.questions"
+            :key="question.questionId"
+        >
             <div class="w-full mb-2 rounded-lg px-3 py-1.5 border border-[#D1D1D1] bg-white">
-                <span class="font-medium text-black">질문 1.</span>
-                <span class="font-medium ml-4 text-black">자기소개를 해주세요</span>
+                <span class="font-medium text-black">질문 {{ index + 1 }}.</span>
+                <span class="font-medium ml-4 text-black">{{ question?.questionText }}</span>
             </div>
             <div class="ml-4 mr-4 flex gap-x-8">
                 <span class="w-[60px] text-black">답변 내용</span>
                 <div class="flex-1">
                     <!-- 답변 내용 -->
                     <span class="text-black">
-                        저는 백엔드 개발자로서 효율적인 시스템 설계와 안정적인 서비스 운영을 중요하게 생각합니다. 저는 백엔드 개발자로서 효율적인 시스템 설계와 안정적인 서비스 운영을 중요하게 생각합니다. 저는 백엔드 개발자로서 효율적인 시스템 설계와 안정적인 서비스 운영을 중요하게 생각합니다. 저는 백엔드 개발자로서 효율적인 시스템 설계와 안정적인 서비스 운영을 중요하게 생각합니다.
+                        {{ question?.transcript }}
                     </span>
                     <!-- 아랫줄 -->
                     <div class="flex justify-between items-center h-8 mt-2">
@@ -20,24 +23,24 @@
                             <div class="flex items-center justify-center">
                                 <span class="flex items-center mr-2">컨닝 의심</span>
                                 <div class="flex h-5 items-center w-fit px-2.5 text-sm rounded-full bg-white text-[#434343] border border-[#434343]">
-                                    안전 <!-- 여기 수정 필요 -->
+                                    {{ question?.cheated ? '의심됨' : '안전' }}
                                 </div>
                             </div>
                             <div class="flex items-center justify-center">
                                 <span class="flex items-center mr-2">미완결 답변</span>
                                 <div class="flex h-5 items-center w-fit px-2.5 text-sm rounded-full bg-white text-[#434343] border border-[#434343]">
-                                    없음 <!-- 여기 수정 필요 -->
+                                    {{ question?.completeAnswer ? '없음' : '있음' }}
                                 </div>
                             </div>
                             <div class="flex items-center justify-center">
                                 <span class="flex items-center mr-2">답변 내용</span>
                                 <div class="flex h-5 items-center w-fit px-2.5 text-sm rounded-full bg-white text-[#434343] border border-[#434343]">
-                                    충족 <!-- 여기 수정 필요 -->
+                                    {{ question?.questionFulfilled ? '충족' : '미충족' }}
                                 </div>
                             </div>
                         </div>
                         <!-- 답변 시간 -->
-                        <span class="text-black">1분 34초</span> <!-- 여기 수정 필요 -->
+                        <span class="text-black">{{ question?.second }}초</span> <!-- 여기 수정 필요 -->
                     </div>
                 </div>
             </div>
@@ -47,7 +50,7 @@
                     <span class="w-[60px] text-black">답변 요약</span>
                     <div class="flex-1">
                         <!-- 답변 요약 내용 -->
-                        <span class="text-black">
+                        <span class="text-black"> <!-- 수정 필요 -->
                             백엔드 개발자로서 효율성과 안정성을 중시하며, 성능 개선 경험을 바탕으로 확장성 있는 시스템 구축에 기여하고 싶습니다.    
                         </span>
                     </div>
@@ -57,16 +60,53 @@
                     <div class="flex-1">
                         <!-- AI 분석 내용 -->
                         <span class="text-black font-medium">
-                        “해당 답변은 지원자의 직무 관련 역량과 목표가 명확하게 드러나 있으나, 실제 사용 기술 스택이나 프로젝트 사례가 구체적으로 언급되지 않아 신뢰도를 높이기 어렵습니다. 지원자의 백엔드 역량과 성과를 더 설득력 있게 전달하려면, 예를 들어 'Spring Boot와 MySQL을 활용한 주문 처리 시스템 개발'과 같이 구체적인 경험을 삽입하는 것이 좋습니다. 또한, 1인칭 시점을 활용한 간결한 문장 구성으로 가독성을 높일 수 있습니다." 
+                            {{ question?.feedback }} 
                         </span>
                     </div>
                 </div>
             </div>
         </div>
-    
+        </div>
     </div>
 </template>
 
 <script setup>
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+const interview = ref([]) // 면접 세션
+const item = ref([]) // 공고
+
+async function fetchInterview() { // 면접 세션 정보 가져오기
+  try {
+    const response = await env.get(`/api/interview/${sessionId}/detail`, {
+      params: {
+        sessionId: sessionId,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    interview.value = response.data.result
+
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+onMounted(fetchInterview);
+
+async function fetchApp() { // 공고 가져오기 
+    try {
+        const response = await env.get(`/api/application/${applicationId}`, {
+            params: {
+                userId: parseInt(userStore.userId),
+                applicationId : applicationId
+            }
+        });
+        item.value = response.data.result;
+    } catch (err) {
+        console.error('공고 상세 조회 실패:', err)
+    }
+}
+onMounted(fetchApp);
 
 </script>

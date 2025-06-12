@@ -24,7 +24,7 @@
                 </div>
 
                 <div class="flex flex-col mt-4 justify-end text-sm">        
-                    <span>{{'자소서 검사는 항목당 20번, 면접검사는 하루 5번 가능합니다 :)'}}</span>
+                    <span>{{'하루에 자소서(항목당) 20회 / 면접(1회당) 5회까지 이용가능합니다 :)'}}</span>
                 </div>
             </div>
 
@@ -264,11 +264,11 @@
             case '자소서 피드백 검사 전':
                 return{
                     text: type===0 ? '검사 하기' : '자소서 없음',
-                    color: type===0 ? 'bg-state' : 'bg-stateIng',
+                    color: type===0 ? 'bg-state' : 'bg-stateNone',
                     action: type===0 ? 'gotoCoverLetter' : null,
                     disabled: type===0 ? false : true,
                 }
-            case '자소서 피드백 완료':
+            case '자소서 피드백 검사 후':
                 return{
                     text: type===0 ? '검사 하기' : '면접 보기',
                     color: type===0 ? 'bg-state' : 'bg-state',
@@ -322,6 +322,7 @@
             router.push({ name: 'SelfIntro', params: { id : resumeId } });
         } else if (action === 'interviewModal') {
             selectedItem.value = {
+                applicationId: item.applicationId,
                 companyName: item.companyName,
                 jobTitle: item.jobTitle,
                 experienceLevel: item.experienceLevel,

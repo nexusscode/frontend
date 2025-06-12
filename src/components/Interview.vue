@@ -2,7 +2,7 @@
 <template>
   <div class="ml-48 mr-48 text-left">
      <div class="inline-block h-10 font-semibold mb-3 px-8 leading-10 bg-white bg-opacity-60 border border-[#D1D1D1] rounded-2xl">
-        <span class="font-semibold truncate">{{ item?.company_name }}&nbsp;&nbsp;-&nbsp;&nbsp;{{ item?.position }}</span>
+        <span class="font-semibold truncate">{{ items?.companyName }}&nbsp;&nbsp;-&nbsp;&nbsp;{{ items?.jobTitle }}</span>
       </div>
 
       <div class="flex flex-col w-full p-8 bg-white bg-opacity-70 border border-[#D1D1D1] rounded-2xl"> <!-- 여기 수정 필요 -> 높이 수정하기 -->
@@ -21,41 +21,50 @@
           </button>
 
           <div class="flex-1 flex h-10 px-4 bg-white text-left items-center border border-[#D1D1D1] rounded-xl">
-            <span v-if="showQuestion">{{ q_idx + 1 }}. {{ questions[q_idx]?.question_text }}</span>
+            <span v-if="showQuestion">{{ q_idx }}. {{ question?.questionText }}</span>
           </div>
         </div>
         
         <!-- 본문 -->
         <div class="flex flex-grow">
           <div class="flex w-full h-full overflow-hidden justify-between border border-[#D1D1D1] rounded-2xl">
-            <!-- <div class="w-3/4 bg-hover2_bg flex justify-center items-center">영상 필요 -> 수정 필요 -->
+            <!-- <div class="w-3/4 bg-hover2_bg flex justify-center items-center"> -->
               <!-- 면접관 영상이 들어갈 위치입니다. -->
             <!-- </div> -->
-             <div class="relative w-3/4 bg-hover2_bg flex justify-center items-center">
+            <div class="relative w-3/4 bg-hover2_bg flex justify-center items-center">
               <video
-                  class="block w-full"
-                  autoplay
-                  playsinline
-                >
-                  <source src="/videos/sample.mp4" type="video/mp4" />
-                  브라우저가 video 태그를 지원하지 않습니다.
-                </video>
+                v-if="videoUrl"
+                :src="videoUrl"
+                class="block w-full"
+                type="video/mp4"
+                autoplay
+                playsinline
+              >
+                브라우저가 video 태그를 지원하지 않습니다.
+              </video>
+              <p v-else>로딩 중...</p>
+              <audio 
+                v-if="ttsUrl" 
+                :src="ttsUrl"
+                autoplay 
+                type="audio/mp4">
+              </audio>
 
 
-                <!-- 웹캠 영상 (작은 화면) -->
-                <video
-                  ref="webcamRef"
-                  autoplay
-                  playsinline
-                  class="absolute bottom-4 left-4 w-fit h-28 rounded-2xl bg-white"
-                ></video>
+              <!-- 웹캠 영상 (작은 화면) -->
+              <video
+                ref="webcamRef"
+                autoplay
+                playsinline
+                class="absolute bottom-4 left-4 w-fit h-28 rounded-2xl bg-white"
+              ></video>
 
-                <!-- 음성 인식 확인용 -->
-                <!-- <div class="max-h-20 overflow-y-auto absolute bottom-4 left-44 right-4 text-white ml-2 text-lg bg-black/60 p-3 rounded">
-                  <p v-if="transcript">{{ transcript }}</p>
-                  <p v-else class="text-[#D1D1D1]">여기에 음성 인식 결과가 표시됩니다.</p>
-                </div> -->
-              </div>
+              <!-- 음성 인식 확인용 -->
+              <!-- <div class="max-h-20 overflow-y-auto absolute bottom-4 left-44 right-4 text-white ml-2 text-lg bg-black/60 p-3 rounded">
+                <p v-if="transcript">{{ transcript }}</p>
+                <p v-else class="text-[#D1D1D1]">여기에 음성 인식 결과가 표시됩니다.</p>
+              </div> -->
+            </div>
 
 
 
@@ -136,7 +145,7 @@
           <div class="flex items-center justify-start">
             <button 
               class="h-10 w-28 font-medium rounded-3xl bg-white text-black shadow-lg hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white"
-              @click="inc_q_idx" 
+              @click="answerPass" 
             >
               질문 넘기기
             </button>
@@ -178,18 +187,16 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { allItems, interview_sessions, interview_questions } from '@/data/dummyData'
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
+import { v4 as uuidv4 } from 'uuid'
 
+const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter() 
 
 const showCompleteModal = ref(false); // 면접 종료 확인 모달
 const webcamRef = ref(null); // 웹캡
-
-const transcript = ref('') // 음성 인식 결과
-const isRecording = ref(false) // 마이크 off
-const mediaRecorder = ref(null) // 인스턴스
-const audioChunks = ref([]) // 오디오 데이터 배열
-const audioBlob = ref(null)
 
 const currentTime = new Date(); //면접 시작 시간
 const elapsedTime = ref('00:00') // 경과 시간
@@ -217,63 +224,115 @@ onUnmounted(() => {
   clearInterval(timerId)
 })
 
-
-
 const q_idx = ref(0);  // 질문 idx
-
-const sessionId = route.params.sessionId // 면접 세션 ID
-const interviewerId = Number(route.params.interviewerId) // 면접관 ID
-
-const interviewSession = computed(() => interview_sessions.find(i => i.id === sessionId)) // 면접 세션
-
-const item = computed(() => { // 공고
-  const itemId = interviewSession.value?.application_id
-  return allItems.find(i => i.id === itemId)
-})
-
-const questions = computed(() => { // 면접 질문들 -> 여기 질문 순서 값으로 정렬한 번 해주기? 수정 필요
-  return interview_questions.filter(i => i.session_id === sessionId)
-})
-
+const items = ref([]) // 공고
+const question = ref([]) // 질문
+const sessionId = route.params.id // 면접 세션 ID
+const applicationId = route.params.applicationId // 공고 ID
+const messages = ref([]) // 출력될 메세지들
 const showQuestion = ref(false) // 질문 보기 여부
+const videoUrl = ref([]) // 비디오 링크
+const presign = ref([]) // 권한
+const intentText = ref([]) // 질문의도
 
-function toggleQuestion() {
-  showQuestion.value = !showQuestion.value
+const audioUrl = ref('') 
+const audioChunks = ref([]) // 오디오 데이터 배열
+const mediaRecorder = ref(null) // 인스턴스
+const ttsUrl = ref([]) // 오디오 링크
+const transcript = ref('') // 음성 인식 결과
+const isRecording = ref(false) // 마이크 off
+const audioBlob = ref(null)
+const fileName = ref('')
+
+async function fetchApp() { // 공고 가져오기
+  try {
+    const response = await env.get(`/api/application/${applicationId}`, {
+      params: {
+        userId: parseInt(userStore.userId),
+        applicationId : applicationId
+      }
+    })
+    items.value = response.data.result
+
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
 }
+onMounted(fetchApp);
 
-const messages = ref([ // 출력될 메세지들
-  "이 질문은 지원자의 문제 해결 능력과 성능 최적화에 대한 이해도를 평가하기 위한 것입니다.",
-  "눈을 더 많이 마주쳐보세요!"
-])
+async function fetchQuestion() { // 질문 가져오기 기능
+  try {
+    const response = await env.get(`/api/interview/${sessionId}/question`, {
+      params: {
+        sessionId: sessionId,
+        seq: q_idx.value,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    question.value = response.data.result
+    videoUrl.value= response.data.result.videoUrl
+    ttsUrl.value = response.data.result.ttsUrl
+    intentText.value = response.data.result.intentText
+    inc_q_idx()
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+onMounted(fetchQuestion);
 
-function addMessage() { // 메세지 추가
-  const text = questions.value[q_idx.value]?.intent_text
-  messages.value.push(text)
-  // console.log("addmsg : " + text)
+async function fetchPresign() { // 답변 업로드용 s3접근 권한 presign 받아오기
+  try {
+    const response = await env.get('/api/interview/voice-presign', {
+      params: {
+        fileName : fileName.value,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    console.log("파일명 : " + fileName.value)
+    presign.value = response.data.result.url
+    console.log(response.data.result)
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
 }
 
 function inc_q_idx() { // 질문 넘기기
-  if (q_idx.value + 1 >= questions.value.length) {
-    console.log("완료 : " + q_idx.value);
+  if (q_idx.value >= question.value?.countAll) { 
+    console.log("마지막 질문 완료 : " + q_idx.value);
     endTime.value = elapsedTime.value;
     showCompleteModal.value = true; // 면접 종료 확인 모달창
     return;
   }
-
   q_idx.value += 1;
   // console.log("addidx : " + q_idx.value)
 }
 
-const confirmEnd = () => { // 면접 종료
-  console.log("면접 종료 확인");
-  showCompleteModal.value = false;
-  
-  // 여기에 api 넘겨줘야함 -> 수정 필요
+async function answerPass() { // 답변 패스
+    try {
+        const response = await env.post('/api/interview/interview-answer-pass', {
+            questionId: question.value?.interviewQuestionId, 
+            audioUrl: null,
+            isCheated: null
+          },{ params: {
+            userId: parseInt(userStore.userId)
+          }
+        })
+        console.log(response.data.message)
+        fetchQuestion()
+    } catch (err) {
+        console.error('데이터 불러오기 실패:', err)
+    }
+}
 
-  router.push({ name: 'InterviewResult', params: { id : sessionId } });
+function addMessage() { // 메세지 추가
+  // console.log("addMessage : " + intentText.value)
+  messages.value.push(intentText.value)
+  // console.log("addmsg : " + text)
+}
 
-};
-
+function toggleQuestion() {
+  showQuestion.value = !showQuestion.value
+}
 
 // 웹캡
 onMounted(async () => {
@@ -287,7 +346,17 @@ onMounted(async () => {
   }
 });
 
-// 마이크
+// const interviewSession = computed(() => interview_sessions.find(i => i.id === sessionId)) // 면접 세션
+// const item = computed(() => { // 공고
+//   const itemId = interviewSession.value?.application_id
+//   return allItems.find(i => i.id === itemId)
+// })
+// const questions = computed(() => { // 면접 질문들 -> 여기 질문 순서 값으로 정렬한 번 해주기? 수정 필요
+//   return interview_questions.filter(i => i.session_id === sessionId)
+// })
+
+/*
+// 음성 인식
 let recognition = null 
 let isRecognizing = false // 내부 플래그(빠르게 연타 오류 방지용)
 onMounted(() => {
@@ -323,6 +392,7 @@ onMounted(() => {
     isRecording.value = false
   }
 })
+*/
 
 // const toggleRecording = () => { // 녹음 시작 / 정지
 //   if (!recognition) return
@@ -334,13 +404,20 @@ onMounted(() => {
 //   }
 //   isRecording.value = !isRecording.value
 // }
+
+// 마이크
 const toggleRecording = async () => { // 녹음 시작 / 정지
   if (isRecording.value) { // 녹음 정지
     mediaRecorder.value.stop()
     isRecording.value = false
   } else { // 녹음 시작
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    mediaRecorder.value = new MediaRecorder(stream)
+    
+    const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=opus')
+      ? 'video/webm; codecs=opus'
+      : 'video/webm';
+
+    mediaRecorder.value = new MediaRecorder(stream, { mimeType: 'video/webm' })
     audioChunks.value = [] // 오디오 초기화
 
     mediaRecorder.value.ondataavailable = (event) => {
@@ -349,11 +426,12 @@ const toggleRecording = async () => { // 녹음 시작 / 정지
 
     mediaRecorder.value.onstop = () => {
       if (audioChunks.value.length === 0) return
-      audioBlob.value = new Blob(audioChunks.value, { type: 'audio/webm' })
-
-      // 여기서부터 audioBlob을 서버로 전송하거나 파일로 저장 가능
+      audioBlob.value = new Blob(audioChunks.value, { type: 'video/webm' })
+      audioUrl.value = URL.createObjectURL(audioBlob.value)
+      audioChunks.value = [] // 오디오 초기화
       console.log('녹음 완료. Blob:', audioBlob.value)
-
+      console.log(audioBlob.value.size)
+      console.log(audioBlob.value.type);
     }
 
     mediaRecorder.value.start()
@@ -378,13 +456,30 @@ const resetTranscript = () => { // 재답변
   console.log('재답변: 녹음 초기화 완료')
 }
 
+// async function convertWebmToMp3(blob) {
+//   if (!ffmpeg.isLoaded()) {
+//     await ffmpeg.load()
+//   }
+//   const inputFileName = 'input.webm'
+//   const outputFileName = 'output.mp3'
+
+//   ffmpeg.FS('writeFile', inputFileName, await fetchFile(blob))
+
+//   await ffmpeg.run('-i', inputFileName, outputFileName)
+
+//   const data = ffmpeg.FS('readFile', outputFileName)
+
+//   return new Blob([data.buffer], { type: 'audio/mp3' })
+// }
+
+// 답변완료
 const completeTranscript = async () => {
   // if (!transcript.value.trim()) { // 답변 없으면 답변 완료 막기
   //   console.warn("답변이 없습니다.");
   //   alert("답변이 없습니다.");
   //   return;
   // }
-  if (!audioBlob) { // 답변 없으면 답변 완료 막기
+  if (!audioBlob.value) { // 답변 없으면 답변 완료 막기
     alert("답변이 없습니다.");
     return;
   }
@@ -402,22 +497,71 @@ const completeTranscript = async () => {
     isRecording.value = false;
   }
 
-
   try {
     // 재생 테스트용 URL
-    const audioUrl = URL.createObjectURL(audioBlob.value)
-    const audio = new Audio(audioUrl)
-    audio.play()
+    const audiourl = URL.createObjectURL(audioBlob.value)
+    const audio = new Audio(audiourl)
+    audio.play() // 수정 필요
 
-    //여기에 api연결하기
+    fileName.value = `${uuidv4()}.webm`
+    // const file = new File([audioBlob], fileName, {
+    //   type: 'audio/mp3',
+    // })
+    
+    // const mp3Blob = await convertWebmToMp3(audioBlob.value)
+
+    await fetchPresign()
+    const presignedUrl = presign.value
+    console.log("presignedUrl : " + presign.value)
+    // audioUrl.value = presign.additionalProp2
+
+    // 오디오 업로드
+    await fetch(presign.value, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'video/webm'
+      },
+      body: audioBlob.value,
+    })
+
+    postAnswer()
 
     // transcript.value = '';
     audioChunks.value = [];
     audioBlob.value = null;
-    inc_q_idx();
+    
+    fetchQuestion()
 
   } catch (error) {
     console.error("오류 : ", error);
   }
 }
+
+async function postAnswer() { // 답변 저장
+    try {
+        const response = await env.post('/api/interview/interview-answer', {
+                questionId: question.value?.interviewQuestionId, 
+                audioUrl: audioUrl.value,
+                isCheated: false
+            },
+            {params: {
+                userId: parseInt(userStore.userId)
+            }
+        })
+        console.log(response.data.message)
+    } catch (err) {
+        console.error('데이터 보내기 실패:', err)
+    }
+}
+
+const confirmEnd = () => { // 면접 종료
+  console.log("면접 종료 확인");
+  showCompleteModal.value = false;
+  
+  // 여기에 api 넘겨줘야함 -> 수정 필요
+
+  router.push({ name: 'InterviewResult', params: { applicationId : applicationId, id : sessionId } });
+};
+
+
 </script>

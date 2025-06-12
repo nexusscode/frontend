@@ -50,40 +50,81 @@
         <!-- 본문 -->
         <div class="ml-4 mr-4 mt-6 rounded-b-xl">
           <!-- 본문의 맨 윗줄 -->
-          <div class="flex justify-between mb-10">
-            <span class="text-3xl font-bold">{{ item?.company_name }} {{ item?.job_title }}</span>
-            <span>면접 날짜/시간 : {{ interviewSession?.started_at }}  /  {{  }}</span>
+          <div class="flex justify-start mb-10"> <!-- justify-between -->
+            <span class="text-3xl font-bold">{{ item?.companyName }} {{ item?.jobTitle }}</span>
+            <!-- <span>면접 날짜/시간 : {{ interviewSession?.started_at }}  /  {{  }}</span> -->
           </div>
-          <InterviewAnalysis v-if="selected === 0" :sessionId="sessionId"/> 
-          <InterviewRecord v-else :sessionId="sessionId"/>
+          <div v-if="item">
+            <InterviewAnalysis v-if="selected === 0" :sessionId="sessionId" :applicationId="applicationId"/> 
+            <InterviewRecord v-else :sessionId="sessionId" :applicationId="applicationId"/>
+          </div>
         </div>
-
       </div>
     </div>
     
   </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { allItems, interview_sessions, interview_summary } from '@/data/dummyData'
 import { useRoute } from 'vue-router'
 import InterviewAnalysis from './InterviewAnalysis.vue';
 import InterviewRecord from './InterviewRecord.vue';
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
 
 const selected = ref(0) 
 const route = useRoute()
 const sessionId = route.params.id // 면접 세션 ID
+const applicationId = route.params.applicationId // 공고 ID
+const userStore = useUserStore()
+const interview = ref([]) // 면접 세션
+const item = ref([]) // 공고
 
-const interviewSession = computed(() => interview_sessions.find(i => i.id === sessionId)) // 면접 세션
-const item = computed(() => { // 공고
-  const itemId = interviewSession.value?.application_id
-  return allItems.find(i => i.id === itemId)
-})
-const interviewSum = computed(() => { // 면접 요약
-  return interview_summary.find(i => i.session_id === sessionId)
-})
+
+
+// const interviewSession = computed(() => interview_sessions.find(i => i.id === sessionId)) // 면접 세션
+// const item = computed(() => { // 공고
+//   const itemId = interviewSession.value?.application_id
+//   return allItems.find(i => i.id === itemId)
+// })
+// const interviewSum = computed(() => { // 면접 요약
+//   return interview_summary.find(i => i.session_id === sessionId)
+// })
 
 // console.log(sessionId)
 
+
+
+async function fetchInterview() { // 면접 세션 정보 가져오기
+  try {
+    const response = await env.get(`/api/interview/${sessionId}/detail`, {
+      params: {
+        sessionId: sessionId,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    interview.value = response.data.result
+
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+onMounted(fetchInterview);
+
+async function fetchApp() { // 공고 가져오기 
+    try {
+        const response = await env.get(`/api/application/${applicationId}`, {
+            params: {
+                userId: parseInt(userStore.userId),
+                applicationId : applicationId
+            }
+        });
+        item.value = response.data.result;
+    } catch (err) {
+        console.error('공고 상세 조회 실패:', err)
+    }
+}
+onMounted(fetchApp);
 
 </script>

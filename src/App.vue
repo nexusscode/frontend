@@ -1,4 +1,3 @@
-
 <template>
   <div class="font-sans">
     <Background />
@@ -30,4 +29,5 @@ const showNav = computed(() => !hiddenNames.includes(route.name));
     display: flex;
     flex-direction: column;
   }
+
 </style>

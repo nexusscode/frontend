@@ -45,7 +45,7 @@
                         </div>
                     </div>
                     <div v-else class="text-center font-medium text-xl py-52 mb-4">
-                        보관된 실제 면접 기록이 없습니다.
+                        보관된 자기소개서 기록이 없습니다.
                     </div>
                 </div>
             </div>
