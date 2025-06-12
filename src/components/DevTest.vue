@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-3xl mx-auto flex flex-col p-8 rounded-xl bg-white shadow">
     <!-- 제목 -->
-    <h2 class="text-xl font-semibold mb-4 text-start">DISC 검사</h2>
+    <h2 class="text-xl font-semibold mb-4 text-start">개발자 성향 검사</h2>
 
     <!-- 진행 바 -->
      <div class="flex justify-between items-baseline">
@@ -78,15 +78,14 @@
 </template>
 
 <script setup>
-import { discQuestions } from '../data/discQuestions'
+import { devQuestions } from '../data/devQuestions'
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
-import { useUserStore } from "@/stores/user";
 import env from '../api/env'
 
 const router = useRouter()
 // 질문 데이터 (예시)
-const allQuestions = reactive([...discQuestions])
+const allQuestions = reactive([...devQuestions])
 
 const questionsPerPage = 5
 const totalQuestions = allQuestions.length
@@ -127,19 +126,19 @@ function prevPage() {
 
 function beforePost(){
   const arr = Array.from({ length: 20 }, (_, i) => ({
-  questionNo: i + 1,
+  questionNo: i + 21,
   score: answers.value[i]
 }))
   answersList.value = arr
 }
 
-// disc 검사 전송
+ // disc 검사 전송
 const answersPost = async () => { 
         try {
             beforePost()
             console.log(answersList.value)
-            await env.put('/api/survey/disc', answersList.value)
-            router.push('/discresult')
+            await env.put('/api/survey/dev', answersList.value)
+            router.push('/devresult')
         } catch (error) {
             console.error('에러 발생:', error)
         }

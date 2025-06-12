@@ -20,9 +20,6 @@ import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 import Background from './components/Background.vue'
 import Navigator from './components/Navigator.vue'
-import SelfIntroResult from './components/SelfIntroResult.vue';
-import InterviewInfo from './components/InterviewInfo.vue';
-import Login from './components/Login.vue';
 
 const route = useRoute();
 const hiddenNames = ['Interview']; // 네비게이션 없는 페이지

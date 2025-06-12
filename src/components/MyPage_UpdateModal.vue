@@ -26,9 +26,12 @@
                     <option value="경력">경력</option>
                 </select>
             </div>
-            <button @click="updateUserInfo" class="self-center px-12 py-1.5 border mt-6 text-xs bg-[#4f89fd] rounded-md text-white">
+            <div class="self-center">
+            <button @click="updateUserInfo" class="self-center px-12 py-1.5 border mr-1 mt-6 text-xs bg-[#4f89fd] rounded-md text-white">
                 수정
             </button>
+            <button @click="close" class="self-center px-12 py-1.5 border border-gray-200 ml-1 mt-6 text-xs bg-white rounded-md">취소</button>
+            </div>
         </div>
     </div>
 </template>
@@ -40,6 +43,7 @@
     const router = useRouter()
 
     const emit = defineEmits(['close']) 
+    const close = () => emit('close')
 
     const userName = ref('')
     const phonefirstnum = ref('')

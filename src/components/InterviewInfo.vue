@@ -1,16 +1,16 @@
 <template>
-    <div class="mt-24">
-        <div name="main_box" class="flex flex-col px-4 py-6 border border-white mx-[180px] text-xs rounded-3xl bg-white/30 ">
+    
+        <div name="main_box" class="min-h-[650px] flex flex-col px-4 py-6 border border-white mx-[180px] mt-28 text-xs rounded-3xl bg-white/30 ">
             <div class="flex justify-between items-baseline mb-4 font-semibold text-xl">
                 <span class="pl-3 ">실제면접 기록하기</span>
-                <button href="#" id="save" class="self-end px-5 py-0.5 border mr-2 text-base font-medium rounded-lg text-white bg-linear-to-r from-[#4653E4] to-[#AB4DFE]">AI 코칭받기</button>
+                <button @click="saveItem" id="save" class="self-end px-5 py-0.5 border mr-2 text-base font-medium rounded-lg text-white bg-linear-to-r from-[#4653E4] to-[#AB4DFE]">보관함에 저장</button>
             </div>
             <div class="flex">
                 <div class="flex flex-col w-3/4 px-10 py-10 border-2 rounded-2xl bg-white">
-                    <div class="flex justify-between pb-4 font-semibold text-sm">
-                        <span>(주) 유비케어</span>
-                        <span>직무: 웹프론트개발자</span>
-                        <span>날짜: 2025.03.24</span>
+                    <div class="flex justify-between pb-4 font-bold text-base">
+                        <span>{{ companyName }}</span>
+                        <span>직무: {{ position }}</span>
+                        <span>날짜: {{ date }}</span>
                     </div>
                     <div v-for="(item, index) in items" :key="item.question" class="flex flex-col text-start">
                         <div class="flex mb-2 justify-between items-baseline">
@@ -60,16 +60,33 @@
                                 시작 시각
                                 <select v-model="startTime" required class="w-[80px] border pl-3 ml-6 rounded-[4px] font-normal appearance-none">
                                     <option disabled hidden selected value="">14:00</option>
-                                    <option value="예시1">예시1</option>
-                                    <option value="예시2">예시2</option>
+                                    <option value="9:00">9:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
                                 </select>
                             </div>
                             <div class="mt-2 font-medium">
                                 도착 시각
                                 <select v-model="endTime" required class="w-[80px] border pl-3 ml-6 rounded-[4px] font-normal appearance-none">
                                     <option disabled hidden selected value="">15:00</option>
-                                    <option value="예시1">예시1</option>
-                                    <option value="예시2">예시2</option>
+                                    <option value="9:00">9:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
                                 </select>
                             </div>
                         </div>
@@ -153,11 +170,19 @@
                 </div>
             </div> 
         </div>
-   </div>
 </template>
 <script setup>
     import {ref, reactive} from 'vue'
     import { resumeItems } from '../data/defaultQuestions'
+    import { useUserStore } from '../stores/user'
+    import env from '../api/env'
+    import { useRouter } from 'vue-router'
+
+    const user = useUserStore()
+    const router = useRouter()
+    const companyName = ref(user.infoForm.company)
+    const position = ref(user.infoForm.position)
+    const date = ref(user.infoForm.date)
 
     const items = reactive([...resumeItems])
     const questionCount = ref(items.length)
@@ -258,6 +283,43 @@
         beforeText.splice(index,1)
         isBtOpen.splice(index,1)
     }
+
+    function changeDayFormat(date){
+        const formattedDate = date.replace(/-/g, '.')
+        return formattedDate
+    }
+
+    const saveItem = async() => {
+        try{
+            for(let i = 0;i<items.length;i++) {
+                items[i].answer = nowText[i]
+            }
+            const [year, month, day] = date.value.split('-').map(Number);
+            const dateOnly = new Date(year, month - 1, day);
+            /*
+            const [shours, sminutes] = startTime.value.split(':').map(Number);
+            const startTimeOnly = new Date(1970, 0, 1, shours, sminutes);
+            const [ehours, eminutes] = endTime.value.split(':').map(Number);
+            const endTimeOnly = new Date(1970, 0, 1, ehours, eminutes);
+            */
+            const item = {
+                memoList: items,
+                companyAtmosphere: selectedAtmosphere.value,
+                interviewers: interviewerCount.value,
+                companyName: companyName.value,
+                position: position.value,
+                interviewDate: dateOnly,
+                startTime: startTime.value,
+                finishedTime: endTime.value,
+            }
+            const res = await env.post(`/api/ApplicationReportMemo`, item)
+            const reportMemoId = res.data.result.reportMemoId
+            await env.post(`/api/ApplicationReportMemo/storage/${reportMemoId}`)
+            router.push('/')
+        } catch (error){
+            console.log('에러 발생: ', error)
+        }
+    }
 </script>
 <style>
     #save {
@@ -266,7 +328,7 @@
     }
     select:required:invalid {
         color: #909090;
-        background-image: url(..//assets/select_arrow.svg);
+        background-image: url(../assets/select_arrow.svg);
         background-repeat: no-repeat;
         background-position: right 10px top 50%;
         background-size: 6px;

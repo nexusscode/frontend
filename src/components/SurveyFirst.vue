@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-3xl mx-auto flex flex-col p-8 rounded-xl bg-white shadow">
     <!-- 제목 -->
-    <h2 class="text-xl font-semibold mb-4 text-start">DISC 검사</h2>
+    <h2 class="text-xl font-semibold mb-4 text-start">DISC와 개발자 성향 검사</h2>
 
     <!-- 진행 바 -->
      <div class="flex justify-between items-baseline">
@@ -78,15 +78,16 @@
 </template>
 
 <script setup>
-import { discQuestions } from '../data/discQuestions'
+import { surveyQuestions } from '../data/surveyQuestions'
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
-import { useUserStore } from "@/stores/user";
 import env from '../api/env'
+import { useUserStore } from '../stores/user';
 
 const router = useRouter()
+const user = useUserStore()
 // 질문 데이터 (예시)
-const allQuestions = reactive([...discQuestions])
+const allQuestions = reactive([...surveyQuestions])
 
 const questionsPerPage = 5
 const totalQuestions = allQuestions.length
@@ -126,7 +127,7 @@ function prevPage() {
 }
 
 function beforePost(){
-  const arr = Array.from({ length: 20 }, (_, i) => ({
+  const arr = Array.from({ length: 40 }, (_, i) => ({
   questionNo: i + 1,
   score: answers.value[i]
 }))
@@ -138,8 +139,9 @@ const answersPost = async () => {
         try {
             beforePost()
             console.log(answersList.value)
-            await env.put('/api/survey/disc', answersList.value)
-            router.push('/discresult')
+            await env.post('/api/survey/submit', answersList.value)
+            user.isSurveyed = true
+            router.push('/surveyfirstresult')
         } catch (error) {
             console.error('에러 발생:', error)
         }

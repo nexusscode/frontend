@@ -200,6 +200,53 @@
         allChecked.value = false
     }
 
+    // state 칩 
+    function getstateConfig(state, type) {
+        switch (state) {
+            case '자소서 피드백 검사 전':
+                return{
+                    text: type===0 ? '검사 하기' : '자소서 없음',
+                    color: type===0 ? 'bg-state' : 'bg-stateIng',
+                    action: type===0 ? 'gotoCoverLetter' : null,
+                    disabled: type===0 ? false : true,
+                }
+            case '자소서 피드백 검사 후':
+                return{
+                    text: type===0 ? '검사 하기' : '면접 보기',
+                    color: type===0 ? 'bg-state' : 'bg-state',
+                    action: type===0 ? 'gotoCoverLetter' : 'interviewModal',
+                    disabled: false,
+                }
+            // case '면접 피드백 완료':
+            //     return{
+            //         text: '완료',
+            //         color: 'bg-stateComplete',
+            //         action: 'gotoInResult',
+            //         disabled: false,
+            //     }
+            /*
+            case 0:
+                return{
+                    text: type===0 ? '검사 하기' : '면접 보기',
+                    color: 'bg-state',
+                    action: type===0 ? 'gotoCoverLetter' : 'interviewModal',
+                    disabled: false,
+                }
+            case 1:
+                return {
+                    text: '검사중',
+                    color: 'bg-stateIng',
+                    action: null,
+                    disabled: true,
+                }
+            case 2:
+                return {
+                    text: '완료',
+                    color: 'bg-stateComplete',
+                    action: type===0 ? 'gotoCLResult' : 'gotoInResult',
+                    disabled: false,
+                }
+            */
 
     function getstateColor(state) {
         switch (state) {
@@ -213,18 +260,31 @@
             return 'bg-stateError'
         }
     }
-    function getstateText(state, type) {
-        switch (state) {
-            case 0:
-                if (type==0) return '검사 하기'
-                else return '면접 보기'
-            case 1:
-            return '검사중'
-            case 2:
-            return '완료'
-            case 3:
-            return '오류'
-        }
+    function handleChipClick(action, item) {
+        if (action === 'gotoCoverLetter') {
+            // router.push(`/coverletter/${item.id}`)
+            const applicationId = item.applicationId;
+            const resumeId = item.resumeId;
+            router.push({ name: 'SelfIntro', params: { applicationId : applicationId, resumeId : resumeId } });
+        } else if (action === 'interviewModal') {
+            selectedItem.value = {
+                companyName: item.companyName,
+                jobTitle: item.jobTitle,
+                experienceLevel: item.experienceLevel,
+                createdAt: item.createdAt,
+            }
+            isOpenInterviewModal.value = true
+        } /* else if (action === 'gotoCLResult') {
+            //router.push(`/coverletter/result/${item.id}`)
+            const applicationId = item.applicationId;
+            const resumeId = item.resumeId;
+            router.push({ name: 'SelfIntroResult', params: { applicationId : applicationId, resumeId : resumeId } });
+        } else if (action === 'gotoInResult') {
+            // router.push(`/analysisrecord/${item.id}`)
+            const sessionId = 'interviewSession0'; // 임시로 지정해둠 여기 수정 -> 면접 세션 어떻게 할건지?
+            router.push({ name: 'InterviewResult', params: { id : sessionId } });
+
+        }*/
     }
 
     // 검색 부분
@@ -247,5 +307,4 @@
         checkedItems.value = Array(items.length).fill(false)
         allChecked.value = false
     }
-
 </script>
