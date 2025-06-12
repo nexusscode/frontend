@@ -115,7 +115,7 @@
                                     v-for="(item, index) in interview"
                                     :key="index"
                                     class="relative shadow-md flex justify-center w-1/3 border border-btnBlue rounded-xl"
-                                    @click="gotoInterviewResult"
+                                    @click="gotoInterviewResult(index)"
                                 >
                                     <div
                                         class="w-32 h-12 flex my-7 mx-2 blur-sm"
@@ -277,11 +277,11 @@ async function saveMemo() {
 
 
 function gotoSelfIntroResult() {
-    const resumeId = resume.resumeId
+    const resumeId = resume.value.resumeId
     router.push({ name: 'SelfIntroResult', params: { id : resumeId } });
 }
-function gotoInterviewResult() {
-    const sessionId = interview.sessionId
+function gotoInterviewResult(index) {
+    const sessionId = interview.value[index].sessionId
     router.push({ name: 'InterviewResult', params: { applicationId : applicationId, id : sessionId } });
 }
 
