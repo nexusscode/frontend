@@ -133,15 +133,16 @@ function beforePost(){
   answersList.value = arr
 }
 
-/* disc 검사 전송
+// disc 검사 전송
 const answersPost = async () => { 
         try {
             beforePost()
+            console.log(answersList.value)
             await env.put('/api/survey/disc', answersList.value)
-            router.push({ name: 'DiscResult' })
+            router.push('/discresult')
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-        */
+        
 </script>

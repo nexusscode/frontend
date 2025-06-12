@@ -60,9 +60,8 @@
     </div>
 </template>
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import env from '../api/env'
-/*
 onMounted(async () => { // 어떤걸 보낼지 체크
     try {
         const res = await env.get('/api/survey/dev/result')
@@ -93,9 +92,9 @@ function init(res){
     devChartData[3].value = result.developmentValuesScore
 
     devType.value = result.devType
-    devDescription.value = result.devDescription
+    devDescription.value = result.description
 
-    devKeywords.value = result.devKeywords
+    devKeywords.value = result.keywords
 }
-*/
+
 </script>

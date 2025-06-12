@@ -7,6 +7,9 @@ const host = `${API_SERVER_HOST}`
 
 const env = axios.create({
   baseURL: `${host}`,
+   headers: {
+    'Content-Type': 'application/json',
+  },
   withCredentials: true
 })
 
@@ -31,10 +34,6 @@ const beforeReq = (config) => {
     console.log("before request.......")
     const userId = user.userId
     const accessToken = user.accessToken
-    console.log('userId', userId)
-    console.log('accessToken:', accessToken)
-    console.log('userId:', user.userId)
-    console.log('accessToken:', user.accessToken)
     //const memberInfo = getCookie("refreshToken")
     /*
     if(!memberInfo) {

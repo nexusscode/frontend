@@ -37,10 +37,10 @@ const routes = [
   { path: '/devresult', name: 'DevResult', component: DevResult }, // 개발자 결과
   
   { path: '/recruitinfo/:id', name: 'RecruitInfo', component: RecruitInfo }, // 공고 상세보기  
-  { path: '/coverletter/:id', name: 'SelfIntro', component: SelfIntro }, // 자소서 화면
-  { path: '/coverletter/result/:id', name: 'SelfIntroResult', component: SelfIntroResult }, // 자소서 피드백 화면
-  { path: '/interview/:applicationId/:id', name: 'Interview', component: Interview }, // 면접 화면
-  { path: '/interview/result/:applicationId/:id', name: 'InterviewResult', component: InterviewResult }, // 면접 피드백 화면
+  { path: '/coverletter/:applicationId/:resumeId', name: 'SelfIntro', component: SelfIntro }, // 자소서 화면
+  { path: '/coverletter/result/:applicationId/:resumeId', name: 'SelfIntroResult', component: SelfIntroResult }, // 자소서 피드백 화면
+  { path: '/interview/:sessionId/:interviewerId', name: 'Interview', component: Interview }, // 면접 화면
+  { path: '/interview/result/:id', name: 'InterviewResult', component: InterviewResult }, // 면접 피드백 화면
 ]
 
 const router = createRouter({

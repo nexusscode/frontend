@@ -8,17 +8,35 @@
         <div class="nav-item absolute left-1/2 transform -translate-x-1/2">
             <router-link to="/recruit" class="mr">AI 검사</router-link>
             <router-link to="/savedrecord" class="mr">보관함</router-link>
-            <router-link to="/interviewinfo">실제 면접</router-link>
+            <button @click="isOpenInfo = true">실제 면접</button>
+            <InterviewInfo_addModal v-if="isOpenInfo" @close="isOpenInfo = false"/>
         </div>
         
         <div class="nav-item">
-          <div>
+          <div class="relative inline-block group" ref="wrapper">
             <router-link v-if="isGuest" to="/login" class="">
               {{ user.userName }}
             </router-link>
-            <span v-else class="mr-4">
-              {{ user.userName }}
+            <span v-else @click="toggleDropdown" class="mr-4 cursor-pointer">
+              {{ user.userName }} <!--김민지님--> 
             </span>
+            <!-- 로그아웃 말풍선 -->
+            <div
+              v-if="show"
+              class="absolute top-full mt-2 ml-8 flex flex-col items-start z-10"
+              style="transform: translateX(-40%)" 
+            >
+              <!-- 꼬리 -->
+              <div
+                class="w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-fuchsia-400 ml-10"
+                style="margin-left: 30px"  
+              ></div>
+
+              <!-- 본체 -->
+              <div @click="doLogout" class="bg-fuchsia-400 text-white text-sm rounded w-32 px-4 py-1.5 text-center whitespace-nowrap cursor-pointer">
+                로그아웃
+              </div>
+            </div>
           </div>
           <div>
             <router-link v-if="!isGuest" to="/mypage" class="flex items-center">
@@ -28,18 +46,53 @@
           </div>
             
         </div>
+        </div>
     </nav>
 
 </template>
 <script setup>
-  import { computed } from 'vue'
+  import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+  import { useRouter } from 'vue-router';
   import { useUserStore } from '../stores/user';
   import { createPinia, setActivePinia } from 'pinia'
+  import env from '../api/env'
+  import InterviewInfo_addModal from './InterviewInfo_addModal.vue';
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
+  })
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside)
+  })
 
   const pinia = createPinia()
+  const router = useRouter()
   setActivePinia(pinia)
   const user = useUserStore()
+  const doLogout = async () => {
+    const res = await env.post(`/api/user/logout`, null, {headers: {
+        'Content-Type': 'application/json',
+      }})
+    user.logout()
+    show.value = false
+    if(res.data.result) alert('로그아웃 완료')
+    router.push('/')
+  }
+  const show = ref(false)
+  const wrapper = ref(null)
+  const toggleDropdown = () => {
+    show.value = !show.value
+  }
+  // 외부 클릭 감지
+const handleClickOutside = (e) => {
+  if (wrapper.value && !wrapper.value.contains(e.target)) {
+    show.value = false
+  }
+}
+
   const isGuest = computed(() => user.userName === '로그인')
+  const isOpenInfo = ref(false)
 </script>
 
 <style scoped>

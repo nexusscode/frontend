@@ -7,14 +7,14 @@ export const useUserStore = defineStore('user', {
     accessToken: '',
     userName: '로그인',
     isLoggedIn : false,
-    isDisced: false,
-    isDeved: false,
+    isSurveyed : false,
+
+    infoForm : {
+      company : '',
+      position : '',
+      date : ''
+    }
   }),
-  getters: {
-    isSurveyed() {
-      return state.isDisced && state.isDeved
-    },
-  },
   actions: {
     login(data) {
       this.userId = data.userId;
@@ -27,6 +27,11 @@ export const useUserStore = defineStore('user', {
       this.userName = '로그인';
       this.accessToken = '';
       this.isLoggedIn = false;
+    },
+    backupForm(form){
+      this.infoForm.company = form.company;
+      this.infoForm.position = form.position;
+      this.infoForm.date = form.date;
     },
     doSurvey(surveyData){
         this.discDevelopSurvey = surveyData;

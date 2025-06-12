@@ -58,7 +58,7 @@
                 <div class="flex justify-between w-full h-2/3">
                     <div class="w-1/2 mr-8">
                         <div class="flex items-center my-4 text-[10px]">당신은 <p class="inline-block px-2 mx-1.5 text-white text-[10px] font-medium bg-btnBlue rounded-2xl">{{ devType }}</p> 입니다</div>
-                        <p class="text-[10px]/3">{{ devDescription }}</p>
+                        <p class="text-[10px]/3">{{ decDescription }}</p>
                     </div>
                     <div class="h-full w-1/2 mr-4">
                         <div class="ml-8 max-w-[150px] h-full rounded-md">
@@ -105,15 +105,15 @@
         </div>
         <span class="self-start">이 결과는 향후 AI 자기소개서 분석의 면접 스타일 추천에 활용됩니다.</span>
         <button class="px-6 py-1 bg-btnBlue text-white rounded-lg">
-            <router-link to="">홈으로가기</router-link>
+            <router-link to="/">홈으로가기</router-link>
         </button>
     </div>
 </template>
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted,ref, reactive } from 'vue'
 import env from '../api/env'
 
-/*
+
 onMounted(async () => { // 어떤걸 보낼지 체크
     try {
         const res = await env.get('/api/survey/result')
@@ -139,7 +139,7 @@ const devChartData = reactive([
 const discType = ref('')
 const discDescription = ref('')
 const devType = ref('')
-const devDescription = ref('')
+const decDescription = ref('')
 
 const discKeywords = ref([])
 const devKeywords = ref([])
@@ -159,11 +159,10 @@ function init(res){
     discType.value = result.discType
     discDescription.value = result.discDescription
     devType.value = result.devType
-    devDescription.value = result.devDescription
+    decDescription.value = result.decDescription
 
     discKeywords.value = result.discKeywords
     devKeywords.value = result.devKeywords
 }
-*/
 
 </script>

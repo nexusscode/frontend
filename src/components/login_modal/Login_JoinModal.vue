@@ -117,12 +117,15 @@
                 alert('이메일을 입력해주세요.')
                 return
             }
-            const res = await axios.post(`${host}/api/user/signup`, {
+            const res = await axios.get(`${host}/api/user/check-email`, {
                 params: {
                     email: userEmail.value
                 }
             })
             canUseEmail.value = res.data.result
+            console.log('result :', res.data.message)
+            if(canUseEmail.value)   alert('이미 등록된 이메일입니다.')
+            else alert('이용 가능한 이메일입니다.')
         } catch (error) {
             console.error('에러 발생:', error)
         }

@@ -1,4 +1,24 @@
 <template>
+       <!-- 로딩 중이면 로딩 스피너 -->
+    <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <!-- SVG 또는 로딩 컴포넌트 -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+        <g fill="currentColor">
+            <circle cx="12" cy="3.5" r="1.5">
+                <animateTransform attributeName="transform" calcMode="discrete" dur="2.4s" repeatCount="indefinite" type="rotate" values="0 12 12;90 12 12;180 12 12;270 12 12"/>
+                <animate attributeName="opacity" dur="0.6s" repeatCount="indefinite" values="1;1;0"/>
+            </circle>
+            <circle cx="12" cy="3.5" r="1.5" transform="rotate(30 12 12)">
+                <animateTransform attributeName="transform" begin="0.2s" calcMode="discrete" dur="2.4s" repeatCount="indefinite" type="rotate" values="30 12 12;120 12 12;210 12 12;300 12 12"/>
+                <animate attributeName="opacity" begin="0.2s" dur="0.6s" repeatCount="indefinite" values="1;1;0"/>
+            </circle>
+            <circle cx="12" cy="3.5" r="1.5" transform="rotate(60 12 12)">
+                <animateTransform attributeName="transform" begin="0.4s" calcMode="discrete" dur="2.4s" repeatCount="indefinite" type="rotate" values="60 12 12;150 12 12;240 12 12;330 12 12"/>
+                <animate attributeName="opacity" begin="0.4s" dur="0.6s" repeatCount="indefinite" values="1;1;0"/>
+            </circle>
+        </g>
+    </svg>
+    </div>
     <div class="h-screen-minus-84 mt-28 mx-36">
         <div name="main_box" class="flex w-11/12 px-3 py-6 border mx-auto rounded-t-3xl bg-white/30">
             <div class="w-3/4 mr-7">
@@ -27,12 +47,12 @@
                                 @input="resize($event, index)" spellcheck="false" :disabled = isDisabled
                                 class="w-full h-px px-3 py-3 rounded-md text-[11px] resize-none overflow-y-hidden min-h-[40px] border border-gray-200 focus:outline outline-btnBlue disabled:bg-white disabled:text-black disabled:opacity-100" 
                                 ></textarea>
-                            <div class="absolute bottom-[18px] right-2 text-[10px]">{{ nowText[index].length }} / 3000</div> 
+                            <div class="absolute bottom-[18px] right-2 text-[10px]">{{ nowText[index]?.length }} / 3000</div> 
                         </div>
                         <div v-if="isBtOpen[index]" class="self-end mt-2 mb-6">
                             <button @click="cancel(item.resumeItemId, index)" class="px-2 py-1.5 border bg-[#f0f0f0] text-xs font-semibold rounded-md">취소</button>
                             <button @click="modifyDone(index)" class="px-2 py-1.5 ml-2 bg-[#f0f0f0] font-semibold text-xs rounded-md">수정완료</button>
-                            <button @click="feedback(index)" class="px-2 py-1.5 ml-2 bg-btnBlue text-white font-semibold text-xs rounded-md">재검사</button>
+                            <button @click="feedback(index)" class="px-2 py-1.5 ml-2 bg-btnBlue text-white font-semibold text-xs rounded-md">검사</button>
                         </div>
                     </div>
                     <div v-if="isOpenAdd" class="mt-2">
@@ -55,8 +75,8 @@
                 </div> 
             </div>
             <div class="w-1/4 flex flex-col justify-end relative">
-                <button v-if="isDisabled" @click="isOpenInterview = true" id="save" class="absolute top-1 right-1 px-4 py-1 border mr-2 text-[11px] font-medium rounded-md text-white bg-linear-to-r from-[#4653E4] to-[#AB4DFE]">AI 코칭 보관함에 저장</button>
-                <SelfIntroResult_interviewModal v-if="isOpenInterview" @close="isOpenInterview = false" />
+                <button v-if="isDisabled" @click="saveResume" id="save" class="absolute top-1 right-1 px-4 py-1 border mr-2 text-[11px] font-medium rounded-md text-white bg-linear-to-r from-[#4653E4] to-[#AB4DFE]">AI 코칭 보관함에 저장</button>
+                <Recruit_List_interviewModal v-if="isOpenInterview" @close="getBackToMain" :Info="selectedItem"/>
                 <div class="flex flex-col justify-between h-full mt-12 mx-2 text-start">
                     <p v-for="(feedbackItem, index) in feedbackItems"
                         :key="feedbackItem.feedbackId"
@@ -71,79 +91,135 @@
 </template>
 <script setup>
     import {ref, reactive, onMounted, nextTick, onBeforeUnmount, onUpdated} from 'vue'
+    import { useRoute } from 'vue-router'
+    import { useRouter } from 'vue-router'
     import LeaderLine from 'leader-line-new'
     import {resumeItemFeedbacks, resumeItems } from '@/data/dummyData'
-    import SelfIntroResult_interviewModal from './SelfIntroResult_interviewModal.vue'
+    import Recruit_List_interviewModal from '@/components/Recruit_List_interviewModal.vue'
     import env from '../api/env'
+    import { useUserStore } from '../stores/user'
+
+    const user = useUserStore()
+
+    const route = useRoute()
+    const router = useRouter()
+
+    const getBackToMain = () => {
+        isOpenInterview.value = false
+        router.push('/')
+    }
+    
+    const saveResume = async () => {
+
+        try{
+            await env.put(`/api/application/resume/${resumeId}/save`)
+            const res = await env.get(`/api/application/${applicationId}`)
+            const temp = res.data.result
+            selectedItem.value = {
+                companyName : temp.companyName,
+                jobTitle : temp.jobTitle,
+                experienceLevel : temp.experienceLevel,
+                createdAt : temp.createdAt,
+            }
+            await nextTick()
+            isOpenInterview.value = true
+        } catch (error) {
+            console.error('에러 발생:', error)
+        }
+    }
+    const selectedItem = ref(null)
+    const applicationId = route.params.applicationId
+    
+    const resumeId = route.params.resumeId 
 
     const sourceRefs = ref([])
     const targetRefs = ref([])
-    const lines = []
-    //import { useResumeStore } from '@/stores/resume';
+    const lines = reactive([])
 
-    //const resume = useResumeStore()
-    //const items = reactive([...resume.resumeItems]) // 대체
-    //const item = reactive({
-    //    question: '',
-    //    answer: '',
-    //})
-    const items = reactive([...resumeItems]) // 여기는 id까지 다 가지는데 (190line)
-    // const resumeId = ref(resume.resumeId)
-    // const feedbackItems = reactive(Array(items.length).fill('')) //대체
+    /* pinia 방식으로 SelfIntro에서 끌어오기
+    import { useResumeStore } from '@/stores/resume';
+
+    const resume = useResumeStore()
+    const items = reactive([...resume.resumeItems]) 
+    const item = reactive({
+        question: '',
+        answer: '',
+    })
+     const resumeId = ref(resume.resumeId)
+     const feedbackItems = reactive(Array(items.length).fill('')) //대체
+    */
+
+    /* dummy
+    const items = reactive([...resumeItems])
+    
     const feedbackItems = reactive([...resumeItemFeedbacks])
-    /*
+    */
+    const items = reactive([])
+    const feedbackItems = reactive([])
+
+    const fetchedFeedbacks = []
     onMounted(async () => {
         try {
+            // 초기 자소서 작성본 가져오기
+            
+            const res1 = await env.get(`/api/resume/${resumeId}`)
+            items.splice(0, items.length, ...res1.data.result)
+            nowText.splice(0, nowText.length, ...Array(items.length).fill(''))
+            beforeText.splice(0, beforeText.length, ...Array(items.length).fill(''))
+            isBtOpen.splice(0, isBtOpen.length, ...Array(items.length).fill(false))
+            feedbackCount.splice(0, feedbackCount.length, ...Array(items.length).fill(1))
+           
+            // 초기 피드백 가져오기
             for(const item of items){
                 const res = await env.get(`/api/resume/feedback/${item.resumeItemId}`)
-                feedbackItemss.push(res.data.result.feedbackText)
-            }   
+                fetchedFeedbacks.push(res.data.result)
+            }
+            feedbackItems.splice(0, feedbackItems.length, ...fetchedFeedbacks)
+            await nextTick()
+               for(let i = 0;i<items.length;i++){
+                const el = document.getElementById(items[i].resumeItemId)
+                if(el){
+                nowText[i] = el.value = items[i].answer
+                el.style.height = '1px'
+                el.style.height = el.scrollHeight + 'px'
+                }
+            }
+            // DOM 크기 변경까지 대기
+            await nextTick()
+            // 선 그리기
+            for (let i = 0; i < feedbackItems.length; i++) {
+                const source = sourceRefs.value[i]
+                const target = targetRefs.value[i]
+                if (source && target) {
+                    const line = new LeaderLine(source, target, {
+                      color: 'gray',
+                      path: 'grid',
+                      endPlug: 'arrow3',
+                      size: 1,
+                    })
+                    lines.push(line)
+            }
+        }
         } catch (err) {
             console.error('API 오류:', err) 
         }
     })
-    */
     
-    const nowText = reactive(Array(items.length).fill(''))
-    const beforeText = reactive(Array(items.length).fill(''))
+    
+    const nowText = reactive([])
+    const beforeText = reactive([])
     const addQuestion = ref('')
     const backupHeight = ref(0)
-    const isBtOpen = reactive(Array(items.length).fill(false))
-    const feedbackCount = reactive(Array(items.length).fill(1))
+    const isBtOpen = reactive([])
+    const feedbackCount = reactive([])
 
     const isOpenInterview = ref(false)
     const isOpenAdd = ref(false)
     const isDisabled = ref(true)
     const isFirstFeedback = ref(false)
-
-    onMounted(async () =>{
-        await nextTick()
-
-        
-        for (let i = 0; i < feedbackItems.length; i++) {
-            const line = new LeaderLine(
-                sourceRefs.value[i],
-                targetRefs.value[i],
-            {     
-                color: 'gray',
-                path: 'grid',       
-                endPlug: 'arrow3',
-                size: 1,
-            }
-            )
-            lines.push(line)
-        }
-            
-        for(let i = 0;i<items.length;i++){
-            const el = document.getElementById(items[i].resumeItemId)
-            nowText[i] = el.value = items[i].answer
-            el.style.height = '1px'
-            el.style.height = el.scrollHeight + 'px'
-        }
-        console.log(sourceRefs.value)
-    })
-
+    const isLoading = ref(false)
     
+    // DOM 뭔가 크기가 바뀔때마다 항상 선 위치 조정
     onUpdated(async () => {
          await nextTick()
         updateLinePosition()
@@ -155,6 +231,7 @@
         })
     }
 
+    // 끝나면 선 반납(삭제)
     onBeforeUnmount(()=>{
         for (let i = 0; i < feedbackItems.length; i++) {
             lines[i].remove()
@@ -183,40 +260,50 @@
         isBtOpen[index] = true
     }
 
-    function cancel(id, index){ // 취소 버튼
-        /*
-        await env.delete(`/api/resume/item/${items[index].resumeItemId}`)
-        */
+    function cancel(id, index) { // 취소 버튼
         document.getElementById(id).value = nowText[index] = beforeText[index]
         document.getElementById(id).style.height = backupHeight.value
         isBtOpen[index] = false
     }
     
-    function modifyDone(index){ // 완료 버튼
-        /*
-        await env.put(`/api/resume/item/${items[index].resumeItemId}`)
-        */
+    const modifyDone = async (index) => { // 완료 버튼 (수정)
+        try{
+        const item = {
+            question: items[index].question,
+            answer: nowText[index],
+        }
+        await env.put(`/api/resume/item/${items[index].resumeItemId}`, item)
+        
         isBtOpen[index] = false
+    }catch(error) {
+         console.error('에러 발생:', error)
+    }
     }
     
-    function questionInsert(){
+    const questionInsert = async()=>{
+        isLoading.value = true
+        try{
         if(!addQuestion.value) return
-        items.push({
-            resumeItemId: 55,  // 여기는 ID 생성을 못함 -> api써야겠지?
-            resumeId: 1,
+        const item = {
             question: addQuestion.value, 
             answer: '',
-            aiCount: 0,
-        })
+        }
+        const res = await env.post(`/api/resume/${resumeId}/item`, item)
+        items.push(res.data.result)
         nowText.push('')
         beforeText.push('')
         isBtOpen.push(false)
+        feedbackCount.push(0)
         sourceRefs.value.push(null)
         targetRefs.value.push(null)
-        lines.push(null)
         isOpenAdd.value = false
         addQuestion.value = ''
-        feedbackCount.push(0)
+
+    } catch (error) {
+         console.error('에러 발생:', error)
+    } finally {
+        isLoading.value = false
+    }
     }
 
     function questionInsertCancel(){
@@ -224,18 +311,31 @@
         addQuestion.value = ''
     }
 
-    function questionDelete(index){
+    const questionDelete = async (index) => {
+        console.log('삭제할 resumeItemId:', items[index]?.resumeItemId)
+        try{
+            console.log('삭제 인덱스:', index)
+            console.log('items:', items)
+            console.log('nowText:', nowText)
+            console.log('lines:', lines)
+        await env.delete(`/api/resume/item/${items[index].resumeItemId}`)
+        if (lines[index]) {
+            lines[index].remove()
+        }
+        lines.splice(index, 1)
+        sourceRefs.value.splice(index,1)
+        targetRefs.value.splice(index,1)
+        feedbackItems.splice(index,1)
         items.splice(index,1)
         nowText.splice(index,1)
         beforeText.splice(index,1)
         isBtOpen.splice(index,1)
-        
-        lines[index].remove()
-        lines.splice(index,1)
-        feedbackItems.splice(index,1)
-        sourceRefs.value.splice(index,1)
-        targetRefs.value.splice(index,1)
         feedbackCount.splice(index,1)
+        await nextTick()
+        updateLinePosition()
+        } catch(error) {
+            console.error('에러 발생:', error) 
+        }
     }
 
     function copyResume(index){
@@ -248,7 +348,7 @@
         if(items[index] && !feedbackItems[index])  {
             for(let i = 0; i< items.length - feedbackItems.length; i++) {feedbackItems.push({
                 feedbackId: it - 1,
-                resumeItemId : 5,
+                resumeItemId : it - 2,
                 feedbackText : '',
             })
             it--
@@ -257,31 +357,44 @@
     }
 
     const feedback = async (index) => {
-        
+        isLoading.value = true
+        try{
         beforeFeedback(index)
 
-        feedbackItems[index] = { // dom 생성, api 써야겠지?
-            feedbackId: 555 + index,
-            resumeItemId : 5,
-            feedbackText: '아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요아뇨뚱인데요',
+        const item = {
+            question: items[index].question,
+            answer: nowText[index]
         }
+        const res = await env.post(`/api/resume/feedback/${items[index].resumeItemId}`, item)
+        feedbackItems[index] = res.data.result
         
         feedbackCount[index]++
 
         await nextTick()
-        if(lines[index] == null){
-        const line = new LeaderLine(
-                sourceRefs.value[index],
-                targetRefs.value[index],
-                {
-                    color: 'gray',
-                    path: 'grid',   
-                    endPlug: 'arrow3',
-                    size: 1,
-                }
-            )
-            lines[index] = line
+        await nextTick()
+        await nextTick()
+
+        if (lines[index]) {
+            lines[index].remove()
+            lines[index] = null;   // 참조 해제
         }
+        if (sourceRefs.value[index] && targetRefs.value[index]) {
+  lines[index] = new LeaderLine(
+    sourceRefs.value[index],
+    targetRefs.value[index],
+    {
+      color: 'gray',
+      path: 'grid',
+      endPlug: 'arrow3',
+      size: 1,
+    }
+  );
+}
+        } catch(error){
+        console.error('에러 발생:', error)
+    } finally {
+        isLoading.value = false
+    }
     }
     /*
     const feedbackResumeItem = async (index) => { // (검사) 버튼 누르면 피드백 가져오기

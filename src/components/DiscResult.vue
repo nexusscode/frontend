@@ -62,10 +62,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import env from '../api/env'
-
-/*
 onMounted(async () => { // 어떤걸 보낼지 체크
     try {
         const res = await env.get('/api/survey/disc/result')
@@ -96,9 +94,8 @@ function init(res){
 
 
     discType.value = result.discType
-    discDescription.value = result.discDescription
+    discDescription.value = result.description
 
-    discKeywords.value = result.discKeywords
+    discKeywords.value = result.keywords
 }
-*/
 </script>

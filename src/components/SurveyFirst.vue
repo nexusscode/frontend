@@ -82,8 +82,10 @@ import { surveyQuestions } from '../data/surveyQuestions'
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router';
 import env from '../api/env'
+import { useUserStore } from '../stores/user';
 
 const router = useRouter()
+const user = useUserStore()
 // 질문 데이터 (예시)
 const allQuestions = reactive([...surveyQuestions])
 
@@ -132,15 +134,16 @@ function beforePost(){
   answersList.value = arr
 }
 
-/* disc 검사 전송
+// disc 검사 전송
 const answersPost = async () => { 
         try {
-            beforePost
+            beforePost()
+            console.log(answersList.value)
             await env.post('/api/survey/submit', answersList.value)
-            router.push({ name: 'SurveyFirstResult' })
+            user.isSurveyed = true
+            router.push('/surveyfirstresult')
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-        */
 </script>

@@ -5,7 +5,7 @@
         <div name="first_layer" class="flex w-full">
           <div class="w-2/3 flex justify-between">
             <div class="w-1/6 mr-6 ">
-              <div class="flex justify-center items-center size-[100px] border rounded-full text-5xl font-normal bg-[#d9d9d9]">{{ discResult.discType }}</div>
+              <div class="flex justify-center items-center size-[100px] border rounded-full text-5xl font-normal bg-[#d9d9d9]">{{ a }}</div>
             </div>
             <div class="w-5/6 flex flex-col text-start justify-around"> 
               <div class="flex items-center mb-1">
@@ -13,14 +13,15 @@
                 <button @click="isOpenUpdate=true" class="px-2.5 py-0.5 border border-gray-300 mx-6 bg-white text-xs rounded-sm">수정</button>
                 <MyPage_UpdateModal v-if = "isOpenUpdate" @close="isOpenUpdate = false"/>
               </div>
-              <div class="flex items-center"><div class="w-1/6">희망분야</div><div class="w-1/5 pr-12">{{ userInfo.devType }}</div><div class="w-1/5">DISC 유형</div><router-link to="/discresult" class="w-auto text-btnBlue">{{ discResult.discType }}유형 </router-link><router-link to="/disctest" class="text-black text-[11px] ml-2 underline">(재검사하기)</router-link></div>
-              <div class="flex items-center"><div class="w-1/6">경력</div><div class="w-1/5 pr-12">{{ userInfo.experienceLevel }}</div><div class="w-1/5">개발자 성향</div><router-link to="/devresult" class="w-auto text-btnBlue">{{ devResult.devType }} </router-link><router-link to="/devtest" class="text-black text-[11px] ml-2 underline">(재검사하기)</router-link></div>
+              <div class="flex items-center"><div class="w-1/6">희망분야</div><div class="w-1/5 pr-12">{{ userInfo.devType }}</div><div class="w-1/5">DISC 유형</div><button @click="handleAction1" class="w-auto text-btnBlue">{{ a }}유형 </button><button @click="handleAction3" class="text-black text-[11px] ml-8 underline">(재검사하기)</button></div>
+              <div class="flex items-center"><div class="w-1/6">경력</div><div class="w-1/5 pr-12">{{ userInfo.experienceLevel }}</div><div class="w-1/5">개발자 성향</div><button @click="handleAction2" class="w-auto text-btnBlue">{{ devResult.devType }} </button><button @click="handleAction4" class="text-black text-[11px] ml-2 underline">(재검사하기)</button></div>
+              <MyPage_NotSurveyModal v-if = isOpenSurvey @close="isOpenSurvey = false" />
             </div>
           </div>
           <div class="w-1/3 flex justify-end">
             <div class="w-3/4">
               <div class="mb-2 text-start">하루 검사 횟수</div>
-              <div class="px-9 py-1.5 border-2 border-[#d9d9d9] self-end bg-white rounded-2xl text-sm/7"><div>AI 면접 검사 횟수&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp4번</div><div>AI 자소서 검사 횟수&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp8번</div></div>
+              <div class="px-9 py-1.5 border-2 border-[#d9d9d9] self-end bg-white rounded-2xl text-sm/7"><div>AI 면접 검사 횟수&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{ todayInterview }}번</div><div>AI 자소서 검사 횟수&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp{{ todayResume }}번</div></div>
             </div>
           </div>
         </div>
@@ -34,7 +35,7 @@
         </div>
         <div name="third_layer" class="w-full mt-4 text-start">자주 등장한 피드백 키워드
           <div class="flex justify-between w-full mt-2">
-            <div class="w-1/3 px-2 py-3 bg-white rounded-2xl text-center">질문의 핵심을 잘못 짚음</div>    <!--추후수정/api---->
+            <div class="w-1/3 px-2 py-3 bg-white rounded-2xl text-center">질문 의도 파악 미흡</div>    <!--추후수정/api---->
             <div class="w-1/3 px-2 py-3 mx-10 bg-white rounded-2xl text-center">중복 표현 사용</div>
             <div class="w-1/3 px-2 py-3 bg-white rounded-2xl text-center">질문의 핵심을 잘못 짚음</div>
           </div>
@@ -47,26 +48,40 @@
           AI 분석을 <span class="text-btnBlue">{{ feedbackCounts.totalAiCount }}</span>번이나 진행했어요. 분명히 더 나아지고 있다는 증거죠!
         </div>
       </div>
-      
     </div>
   </template>
   <script setup>
     import MyPage_UpdateModal from './MyPage_UpdateModal.vue'
-    import {ref, reactive, onBeforeMount, onMounted} from 'vue'
+    import {ref, computed, onBeforeMount, onMounted} from 'vue'
+    import { useRouter } from 'vue-router';
     import env from '@/api/env'
     import { useUserStore } from "@/stores/user";
+    import MyPage_NotSurveyModal from './MyPage_NotSurveyModal.vue';
 
+    const router = useRouter()
     const user = useUserStore()
 
     const isOpenUpdate = ref(false)
-    const userInfo = reactive({})
-    const discResult = reactive({
-
+    const isOpenSurvey = ref(false)
+    const userInfo = ref({
+      name: ''
     })
-    const devResult = reactive({})
-    const recentResume = reactive({})
-    const recentInterview = reactive({})
-    const feedbackCounts = reactive({})
+    const discResult = ref({
+      discType: '',
+    })
+    const a = ref('')
+    const devResult = ref({
+      devType: '',
+    })
+    const recentResume = ref({})
+    const recentInterview = ref({})
+    const feedbackCounts = ref({
+      resumeAiCount: 0,
+      interviewAiCount: 0,
+      totalAiCount: 0,
+    })
+    const todayResume = ref(0)
+    const todayInterview = ref(0)
 
     function changeDayFormat(dayFormat){
       const isoString = dayFormat
@@ -83,31 +98,70 @@
 
 
     onMounted(async () => {
+      const requests = [
+        env.get('/api/user'), // 항상 실행
+        env.get('/api/application/resume/recent'),
+        env.get('/api/interview/recent'),
+        env.get('/api/user/feedback-count'),
+        env.get('/api/survey/disc/result'),
+        env.get('/api/survey/dev/result'),
+        env.get(`/api/resume/feedback/remaining`)
+      ];
 
-      const requests = []
+  try {
+    const results = await Promise.allSettled(requests);
 
-      requests.push(env.get('/api/user')) // 항상 실행
+    if (results[0].status === 'fulfilled') {
+      userInfo.value = results[0].value.data.result;
+    }
 
-      if (user.isDisced) {
-        requests.push(env.get('/api/survey/disc/result'))
+    if (results[1].status === 'fulfilled') {
+      recentResume.value = results[1].value.data.result;
+      recentResume.value.modifiedAt = changeDayFormat(recentResume.value.modifiedAt)
+    } else {
+      recentResume.value =  
+      {
+        applicationTitle: '자기소개서 AI피드백을 받아보세요.',
+        modifiedAt: 'xxxx-xx-xx',
+        resumeId: 0,
       }
+    }
 
-      if (user.isDeved) {
-        requests.push(env.get('/api/survey/dev/result'))
-      }
-      
-      try {
-    const res = await Promise.all(requests)
+    if (results[2].status === 'fulfilled') {
+      recentInterview.value = results[2].value.data.result;
+      recentInterview.value.createdAt = changeDayFormat(recentInterview.value.createdAt);
+    } else {
+      recentInterview.value = {
+        sessionId: 0,
+        title: '모의면접 AI피드백을 받아보세요.',
+        createdAt: 'xxxx-xx-xx'
+      };
+    }
 
-    Object.assign(userInfo, res[0].data.result)
+    if (results[3].status === 'fulfilled') {
+      feedbackCounts.value = results[3].value.data.result;
+    }
 
-    if (user.isDisced) {
-         Object.assign(discResult, res[1].data.result)
-      }
+    if (results[4].status === 'fulfilled') {
+      discResult.value = results[4].value.data.result;
+    } else if (results[4].reason?.response?.status === 404) {
+      console.log('DISC 검사 없음')
+    }
 
-      if (user.isDeved) {
-        Object.assign(devResult, res[2].data.result)
-      }
+    if (results[5].status === 'fulfilled') {
+      devResult.value = results[5].value.data.result;
+    } else if (results[5].reason?.response?.status === 404) {
+      console.log('개발자 검사 없음')
+    }
+
+    if (results[6].status === 'fulfilled') {
+      todayResume.value = results[6].value.data.result
+    }
+
+
+    
+    const str = discResult.value.discType
+    a.value = str.at(-2)
   } catch (error) {
     console.error('데이터 로딩 에러:', error)
   }
@@ -121,4 +175,33 @@
         }
     })
     */
+
+    const handleAction1 = () => {
+  if (discResult.value.discType == '') {
+    isOpenSurvey.value = true // 모달 띄움
+  } else {
+    router.push('/surveyfirstresult') // 페이지 이동
+  }
+}
+const handleAction2 = () => {
+  if (discResult.value.discType == '') {
+    isOpenSurvey.value = true // 모달 띄움
+  } else {
+    router.push('/devresult') // 페이지 이동
+  }
+}
+const handleAction3 = () => {
+  if (discResult.value.discType == '') {
+    isOpenSurvey.value = true // 모달 띄움
+  } else {
+    router.push('/disctest') // 페이지 이동
+  }
+}
+const handleAction4 = () => {
+  if (discResult.value.discType == '') {
+    isOpenSurvey.value = true // 모달 띄움
+  } else {
+    router.push('/devtest') // 페이지 이동
+  }
+}
   </script>

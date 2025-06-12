@@ -126,21 +126,22 @@ function prevPage() {
 
 function beforePost(){
   const arr = Array.from({ length: 20 }, (_, i) => ({
-  questionNo: i + 1,
+  questionNo: i + 21,
   score: answers.value[i]
 }))
   answersList.value = arr
 }
 
-/* disc 검사 전송
+ // disc 검사 전송
 const answersPost = async () => { 
         try {
-            beforePost
+            beforePost()
+            console.log(answersList.value)
             await env.put('/api/survey/dev', answersList.value)
-            router.push({ name: 'DevResult' })
+            router.push('/devresult')
         } catch (error) {
             console.error('에러 발생:', error)
         }
     }
-        */
+     
 </script>
