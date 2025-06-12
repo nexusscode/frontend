@@ -1,5 +1,19 @@
+export const allItems = [ // 이미 등록된 공고들 
+    { id: 100, company_name: "네이버", position: "백엔드 개발자", experience_level: "신입/경력", created_at: "2025/05/11", saramin_job_id: "saramin1", stateCoverletter: 0, stateInterview: 0, job_title: "개발자 신입 및 경력 모집" },
+    { id: 101, company_name: "카카오", position: "백엔드 개발자", experience_level: "경력", created_at: "2025/05/11", saramin_job_id: "saramin1", stateCoverletter: 1, stateInterview: 1, job_title: "백엔드개발자 신입 및 경력 모집" },
+    { id: 102, company_name: "네이버", position: "프론트 개발자", experience_level: "신입", created_at: "2025/05/11", saramin_job_id: "saramin1", stateCoverletter: 2, stateInterview: 2, job_title: "프론트 개발자 신입 모집" },
+    ...Array.from({ length: 50 }, (_, i) => ({ 
+        id: i,
+        company_name: `(주)리더스시스템즈 ${i}`,
+        position: "Full Stack 개발자",
+        experience_level: "경력/무관",
+        job_title: "풀스택 개발자 공채 모집", 
+        created_at: "2025/04/02",
+        saramin_job_id: "saramin1", // 사람인 공고 id -> 임시로 지정해둠(수정 필요)
+        stateCoverletter: 0,
+        stateInterview: 0,
+}))];
 
-    
 export const recruits = [ // 사람인 api로 받아오는 공고들
     ...Array.from({ length: 7 }, (_, i) => ({ 
         id: `saramin${i}`,
@@ -80,6 +94,8 @@ export const interview_summary = [ // 면접 요약
         summary: "지원자께서는 전반적으로 진중한 태도로 질문에 성실히 임하셨습니다. 자신의 경험을 바탕으로 진솔하게 답변하려는 노력이 느껴졌습니다. 다만 일부 표현에서 반복 사용되는 어휘가 있어 전달력에 아쉬움이 있었습니다. 또한 문장 구성에서 주어와 서술어의 연결이 다소 어색한 부분이 관찰되었습니다. 표현력과 논리적인 구성력을 보완하신다면 더욱 설득력 있는 커뮤니케이션이 가능할 것으로 기대됩니다.", // 면접에 대한 전반적인 요약
         created_at: "", 
 }))];
+
+
 export const resumeItems = [
         {
             resumeItemId: 11,

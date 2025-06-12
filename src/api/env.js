@@ -10,6 +10,7 @@ const env = axios.create({
    headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 })
 
 const refreshJWT = async (accessToken) => {
@@ -33,7 +34,6 @@ const beforeReq = (config) => {
     console.log("before request.......")
     const userId = user.userId
     const accessToken = user.accessToken
-    console.log('userId:', user.userId)
     //const memberInfo = getCookie("refreshToken")
     /*
     if(!memberInfo) {

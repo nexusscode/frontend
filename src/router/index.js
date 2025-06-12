@@ -1,12 +1,17 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
+
 import MainPage from '@/components/MainPage.vue'
-import Recruit from '@/components/Recruit.vue'
-import AnalysisRecord from '@/components/AnalysisRecord.vue'
-import Community from '@/components/Community.vue'
+import Recruit from '@/components/Recruit_List.vue'
+// import SavedRecord from '@/components/SavedRecord.vue'
+import SavedRecord_Tab from '../components/SavedRecord_Tab.vue'
+import InterviewInfo from '@/components/InterviewInfo.vue'
 import MyPage from '@/components/MyPage.vue'
+import Login from '@/components/Login.vue'
 import SelfIntro from '@/components/SelfIntro.vue'
+import SelfIntroResult from '@/components/SelfIntroResult.vue'
 import Interview from '@/components/Interview.vue'
+import InterviewReal from '@/components/InterviewReal.vue'
 import InterviewResult from '@/components/InterviewResult.vue'
 import SurveyFirst from '@/components/SurveyFirst.vue'
 import SurveyFirstResult from '@/components/SurveyFirstResult.vue'
@@ -15,6 +20,7 @@ import DiscResult from '@/components/DiscResult.vue'
 import DevTest from '@/components/DevTest.vue'
 import DevResult from '@/components/DevResult.vue'
 import RecruitInfo from '@/components/RecruitInfo.vue'
+import InterviewResult from '@/components/InterviewResult.vue'
 
 const routes = [
   { path: '/', name: 'Main', component: MainPage }, // 메인화면

@@ -1,6 +1,6 @@
-<!-- 탭 부분 : 이제 안 쓰임(일단 남겨는 뒀습니다) -->
+<!-- 보관함 탭 부분 -->
 <template>
-  <div class="relative flex top-10 min-h-[calc(100vh-84px)]">
+  <div class="relative flex top-10 min-h-[calc(100vh-145px)]">
     <div class="fixed left-0 space-y-2"> <!-- 탭 버튼 -->
       <button
         v-for="(tab, index) in tabs"
@@ -16,7 +16,7 @@
       </button>
     </div>
 
-    <div class="ml-20 mr-20 px-8 pb-8 flex-1">
+    <div class="flex-1">
       <component :is="getCurrentComponent()" />
     </div>
   </div>
@@ -25,16 +25,18 @@
 
 <script setup>
 import { ref } from 'vue'
-import Recruit_List from './Recruit_List.vue' // 목록 탭
-import Recruit_InterviewSummary from './Recruit_InterviewInfo.vue' // 면접 기록 탭
+import SavedRecord_resume from './SavedRecord_resume.vue' // 자소서 탭
+import SavedRecord_interview from './SavedRecord_interview.vue' // 면접 탭
+import SavedRecord_info from './SavedRecord_info.vue' // 실제 면접 탭
 
-const tabs = ['공고 목록', '면접 기록'] 
+const tabs = ['자소서', '면접', '실제 면접'] 
 const currentTab = ref(0)
 
 function getCurrentComponent() { // 탭 내용 불러옴
   switch (currentTab.value) {
-    case 0: return Recruit_List
-    case 1: return Recruit_InterviewSummary
+    case 0: return SavedRecord_resume
+    case 1: return SavedRecord_interview
+    case 2: return SavedRecord_info
   }
 }
 

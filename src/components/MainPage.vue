@@ -1,3 +1,4 @@
+<!-- 메인 화면 -->
 <template>
     <div class="content flex flex-row w-full">
         <div class="w-1/2 pr-4 ml-32 flex flex-col justify-start items-start"> <!-- 왼쪽 영역 -->
@@ -28,7 +29,7 @@
                             type="text"
                             placeholder="AI 코칭을 받을 회사명을 입력하세요"
                             class="flex-1 bg-transparent outline-none text-sm text-[#767676]"
-                            @input="handleSearch"
+                            @keydown.enter="handleSearch"
                         />
                     </div>
                     <!-- 드롭 다운 -->
@@ -43,10 +44,10 @@
                             @click="selectCompany(company)"
                         >
                             <div class="flex justify-between w-full">
-                                <span>{{ company.position }}</span>
+                                <span>{{ company.title }}</span>
                                 <div class="flex justify-between w-2/3 text-right gap-2">
-                                    <span class="w-1/3 truncate">{{ company.career }}</span>
-                                    <span class="w-2/3 truncate">{{ company.company }}</span>
+                                    <span class="w-1/3 truncate">{{ company.experienceLevel }}</span>
+                                    <span class="w-2/3 truncate">{{ company.companyName }}</span>
                                 </div>
                             </div>
                         </li>
@@ -58,8 +59,11 @@
                         예시보기 <!-- 기능 구현 필요, 수정 필요 -->
                     </button>
 
-                    <button class="mt-6 w-1/3 py-1.5 font-semibold bg-btnBlue text-white rounded-xl text-lg hover:bg-hover active:bg-pressed">
-                        검색하기 <!-- 기능 구현 필요, 수정 필요 -->
+                    <button 
+                        class="mt-6 w-1/3 py-1.5 font-semibold bg-btnBlue text-white rounded-xl text-lg hover:bg-hover active:bg-pressed"
+                        @click="createApplication"
+                    >
+                        시작하기
                     </button>
                 </div>
             </div>
@@ -70,25 +74,70 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { allItems } from '@/data/dummyData'
+import { useRouter } from 'vue-router'
+import { recruits } from '@/data/dummyData'
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+const router = useRouter() 
+
+// 더미 데이터
+const companies = ref([...recruits])
 
 // 검색 부분
-// 더미 데이터
-const companies = ref([...allItems])
-
 const search = ref('') // 사용자 입력 값(검색어)
 const results = ref([]) // 검색 결과들
+const selectedRecruit = ref(null)
 //const isLoading = ref(false) // 로딩 표시
 
-function handleSearch() {
-    const keyword = search.value.toLowerCase()
-    results.value = companies.value.filter(c =>
-        c.company.toLowerCase().includes(keyword)
-    )
+async function handleSearch() { // 공고 검색 기능
+    if (search.value.length < 2) return // 너무 짧으면 검색 안함
+    try {
+      const response = await env.get('/api/saramin', {
+        params: {
+          userId: parseInt(userStore.userId),
+          keyword : search.value
+        }
+      })
+      results.value = response.data.result
+    } catch (err) {
+      console.error('공고 상세 조회 실패:', err)
+    }
 }
-function selectCompany(company) {
-    search.value = `${company.position} / ${company.career} / ${company.company}`
+function selectCompany(recruit) { // 공고 선택
+    search.value = `${recruit.title} / ${recruit.experienceLevel} / ${recruit.companyName}`
+    selectedRecruit.value = recruit
     results.value = []
+    console.log("공고 선택 : " + selectedRecruit.value.saraminId)
 }
+async function createApplication() { // 공고 등록 기능
+    const sRecruit = selectedRecruit.value
+    console.log("공고 등록 : " + selectedRecruit.value.saraminId)
+    if (!sRecruit) {
+      // console.warn('회사 정보가 선택되지 않았습니다.')
+      return
+    }
+    try {
+      const saraminId = selectedRecruit.value.saraminId
+      const response = await env.post('/api/application', {
+        saraminJobId : saraminId,
+        params: {
+          userId: parseInt(userStore.userId)
+        }
+      })
+      console.log('보내는 userId:', userStore.userId)
+      console.log('보내는 saraminJobId:', saraminId)
+      console.log('신규 공고 등록:', response.data.result)
+
+      router.push({ name: 'Recruit'});
+    } catch (error) {
+      console.error('신규 공고 등록 실패:', error)
+    }
+  }
+
+
+
+
 
 </script>

@@ -33,13 +33,6 @@
                     </button>
                     <SelfIntro_evalModal @postResume = "axiosFirstResume" v-if="isOpenEval" @close="isOpenEval = false" :companyName="companyName" :jobTitle="jobTitle"/> 
                 </div>
-                <a class="flex justify-center w-full py-3 border-[#576edf] border-2 rounded-xl text-center font-semibold text-lg" href="#">
-                    <img src="./ima.svg" alt="" class="w-4 h-4 mr-4">
-                    자기소개서 문서 추가 
-                </a>
-                <a class="self-end px-4 py-2 border my-4 text-sm bg-[#4f89fd] rounded-lg text-white" href="#">
-                    AI 검사 받기
-                </a>
             </div>
             <div name="type_area" class="flex flex-col w-full h-full px-8 py-3 border-2 my-2 rounded-xl bg-white">
                 <div class="py-2 mb-2 self-start font-bold">{{ companyName }} - {{ jobTitle }}</div>
@@ -69,22 +62,19 @@
                             <button @click="questionInsert" class="px-2 py-1.5 ml-2 bg-btnBlue text-white text-xs rounded-md">추가</button>
                         </div>
                     </div>
-                    <div class="flex flex-col px-8 pt-10 border-2 mt-4 rounded-xl bg-white">
-                        <p class="mb-4 text-[13px] font-semibold">1. 입사하고 싶은 이유와 준비 과정을 구체적으로 적어주세요.</p>
-                        <textarea ref="textArea" @input="resize" class="p-3 mb-4 rounded-md text-[11px] border border-gray-200 resize-vertical overflow-y-hidden min-h-[48px]"> 
-                        <p class="mb-4 text-[13px] font-semibold">1. 입사하고 싶은 이유와 준비 과정을 구체적으로 적어주세요.</p>
-                        <textarea ref="textArea" @input = "resize" class="p-3 mb-4 rounded-md text-[11px] border border-gray-200 resize-none overflow-y-hidden min-h-[48px]"> </textarea>
-                        <p class="mb-4 text-[13px] font-semibold">1. 입사하고 싶은 이유와 준비 과정을 구체적으로 적어주세요.</p>
-                        <textarea ref="textArea" @input = "resize" class="p-3 mb-4 rounded-md text-[11px] border border-gray-200 resize-none overflow-y-hidden min-h-[48px]"> </textarea>
-                    </div>
+                    <textarea
+                        @input="resize2($event)" 
+                        spellcheck="false"
+                        class="w-full h-px px-3 py-2 rounded-md text-[11px] resize-none overflow-y-hidden min-h-[30px] border border-gray-200 focus:outline outline-btnBlue"
+                    ></textarea>
                 </div>
+                <button @click="isOpenAdd = true" class="flex items-center self-center px-8 py-1.5 my-6 rounded-md bg-btnBlue text-white text-[12px]">
+                    <img src="../assets/add_self.svg" alt="" class="mr-2 w-[14px] h-[14px]">질문 추가하기
+                </button>
             </div>
         </div>
-<<<<<<< Updated upstream
-=======
     </div>
     <SelfIntro_surveyModal v-if="isOpenSurvey" @close="isOpenSurvey = false"/>
->>>>>>> Stashed changes
 </template>
 
 <script setup>
@@ -200,5 +190,4 @@
             router.push({ name: 'SelfIntroResult', params: { applicationId: applicationId, resumeId : resumeId } }) 
         }
     }
-    
 </script>

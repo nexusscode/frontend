@@ -1,8 +1,3 @@
-<script setup>
-import Background from './components/Background.vue'
-import Navigator from './components/Navigator.vue'
-</script>
-
 <template>
   <div class="font-sans">
     <Background />
@@ -34,7 +29,5 @@ const showNav = computed(() => !hiddenNames.includes(route.name));
     display: flex;
     flex-direction: column;
   }
-
-  
 
 </style>

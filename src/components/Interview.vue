@@ -1,5 +1,582 @@
+<!-- 면접 화면 -->
 <template>
-    <div>
-      면접 구현 예정입니다.
+  <div class="ml-48 mr-48 text-left">
+     <div class="inline-block h-10 font-semibold mb-3 px-8 leading-10 bg-white bg-opacity-60 border border-[#D1D1D1] rounded-2xl">
+        <span class="font-semibold truncate">{{ items?.companyName }}&nbsp;&nbsp;-&nbsp;&nbsp;{{ items?.jobTitle }}</span>
+      </div>
+
+      <div class="flex flex-col w-full p-8 bg-white bg-opacity-70 border border-[#D1D1D1] rounded-2xl"> <!-- 여기 수정 필요 -> 높이 수정하기 -->
+        <!-- 맨 위 줄 -->
+        <div class="flex items-center h-10 justify-between gap-2 mb-3">
+          <button 
+            :class="[
+              'h-10 w-40 font-medium rounded-xl transition-colors',
+              showQuestion 
+              ? 'bg-white border border-btnBlue hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white' 
+              : 'bg-btnBlue text-white hover:bg-hover active:bg-pressed'
+            ]"
+            @click="toggleQuestion"
+          >
+            {{ showQuestion ? '질문 접기' : '클릭하여 질문 보기' }}
+          </button>
+
+          <div class="flex-1 flex h-10 px-4 bg-white text-left items-center border border-[#D1D1D1] rounded-xl">
+            <span v-if="showQuestion">{{ q_idx }}. {{ question?.questionText }}</span>
+          </div>
+        </div>
+        
+        <!-- 본문 -->
+        <div class="flex flex-grow">
+          <div class="flex w-full h-full overflow-hidden justify-between border border-[#D1D1D1] rounded-2xl">
+            <!-- <div class="w-3/4 bg-hover2_bg flex justify-center items-center"> -->
+              <!-- 면접관 영상이 들어갈 위치입니다. -->
+            <!-- </div> -->
+            <div class="relative w-3/4 bg-hover2_bg flex justify-center items-center">
+              <video
+                v-if="videoUrl"
+                :key="q_idx"
+                :src="videoUrl"
+                class="block w-full"
+                type="video/mp4"
+                autoplay
+                playsinline
+              >
+                브라우저가 video 태그를 지원하지 않습니다.
+              </video>
+              <p v-else>로딩 중...</p>
+              <audio 
+                v-if="ttsUrl"
+                :key="q_idx" 
+                :src="ttsUrl"
+                autoplay 
+                type="audio/mp4">
+              </audio>
+
+
+              <!-- 웹캠 영상 (작은 화면) -->
+              <video
+                ref="webcamRef"
+                autoplay
+                playsinline
+                class="absolute bottom-4 left-4 w-fit h-28 rounded-2xl bg-white"
+              ></video>
+
+              <!-- 음성 인식 확인용 -->
+              <!-- <div class="max-h-20 overflow-y-auto absolute bottom-4 left-44 right-4 text-white ml-2 text-lg bg-black/60 p-3 rounded">
+                <p v-if="transcript">{{ transcript }}</p>
+                <p v-else class="text-[#D1D1D1]">여기에 음성 인식 결과가 표시됩니다.</p>
+              </div> -->
+            </div>
+
+
+
+            <div class="h-full w-1/4 p-3 ml-1 justify-start bg-white items-start">
+              <div class="flex mb-3 h-6">
+                <span class="font-medium text-left">AI 조언</span>
+              </div>
+              <div class="flex flex-col h-[calc(100vh-330px)] max-w-full text-left"> <!-- 높이 수정 필요 -->
+                <div class="flex-grow overflow-auto mb-4">
+                  <div 
+                    v-for="(msg, index) in messages" 
+                    :key="index" 
+                    class="inline-block mb-4 break-all whitespace-pre-line text-xs text-left font-medium px-2 py-4 bg-[#EAF5FF] rounded-xl"
+                  >
+                    <div>"{{ msg }}"</div>
+                  </div>
+                  
+                </div>
+
+                <div class="flex justify-center h-9">
+                  <button 
+                    class="h-9 w-40 font-medium rounded-xl bg-btnBlue text-white hover:bg-hover active:bg-pressed"
+                    @click="addMessage"
+                  >
+                    질문 의도 파악하기
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 아래 라인 -->
+        <div class="flex h-12 mt-6 items-center justify-between">
+          <!-- 왼쪽 -->
+          <div class="flex items-center justify-start gap-2">
+            <img src="../assets/time_icon.svg" class="w-4 h-4" alt="시간" />
+            <span class="font-semibold w-[55px] text-center">{{ elapsedTime }}</span>
+          </div>
+
+          <!-- 가운데 -->
+          <div class="flex items-center justify-center gap-3">
+            <button 
+              class="h-10 w-28 font-semibold rounded-xl bg-white text-btnBlue border border-btnBlue hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white"
+              @click="resetTranscript"
+            >
+              재답변
+            </button>
+            <div 
+              class="group border items-center flex h-10 px-5 rounded-3xl cursor-pointer active:bg-pressed"
+              @click="toggleRecording"
+              :class="{ 
+                'bg-btnBlue hover:bg-hover': isRecording, 
+                'bg-white hover:bg-hover2_bg' : !isRecording
+              }"
+            >
+              <img 
+                src="../assets/mic_icon.svg" 
+                class="w-4 h-4" 
+                alt="마이크"
+                :class="{ 
+                  'invert': isRecording,
+                  'group-active:invert': !isRecording, 
+                 }"
+              />
+            </div>
+            <button 
+              class="h-10 w-28 font-semibold rounded-xl bg-btnBlue text-white hover:bg-hover active:bg-pressed"
+              @click="completeTranscript" 
+            >
+              답변완료
+            </button><!-- 기능 구현 필요 -> 수정 필요(api / 보내기) + 질문 넘기기 -->
+          </div>
+
+          <!-- 오른쪽 -->
+          <div class="flex items-center justify-start">
+            <button 
+              class="h-10 w-28 font-medium rounded-3xl bg-white text-black shadow-lg hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white"
+              @click="answerPass" 
+            >
+              질문 넘기기
+            </button>
+          </div>
+
+        </div>
+      </div>
+  </div>
+
+  <!-- 면접 종료 모달창 -->
+  <div v-if="showCompleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white gap-y-8 p-8 w-1/3 rounded-xl flex flex-col items-center justify-center">
+      <div class="flex w-full text-2xl font-medium">면접을 종료하시겠습니까?</div>
+      <div class="border border-[#D1D1D1] w-fit px-8 py-2 my-2 text-xl rounded-full">
+        <span class="font-medium">면접 시간</span>
+        <span class="px-4">|</span>
+        <span class="font-semibold text-btnBlue">{{ endTime }}</span>
+      </div>
+      <div class="flex justify-center gap-2">
+        <button 
+          @click="showCompleteModal = false"
+          class="px-10 py-1 bg-white text-btnBlue border border-btnBlue text-lg font-medium rounded-xl hover:bg-hover2_bg hover:text-hover2_txt active:bg-pressed active:text-white"
+        >
+          취소
+        </button>
+        <button 
+          @click="subscribeInterview" 
+          class="px-10 py-1 bg-btnBlue text-lg font-medium text-white rounded-xl hover:bg-hover active:bg-pressed"
+        >
+          종료
+        </button>
+      </div>
     </div>
-  </template>
+  </div>
+</template>
+
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { allItems, interview_sessions, interview_questions } from '@/data/dummyData'
+import env from '@/api/env'
+import { useUserStore } from '@/stores/user'
+import { v4 as uuidv4 } from 'uuid'
+
+const userStore = useUserStore()
+const route = useRoute()
+const router = useRouter() 
+
+const showCompleteModal = ref(false); // 면접 종료 확인 모달
+const webcamRef = ref(null); // 웹캡
+
+const currentTime = new Date(); //면접 시작 시간
+const elapsedTime = ref('00:00') // 경과 시간
+const endTime = ref(null) // 종료 모달창 시간
+const timeStr_Date = currentTime.toISOString();
+const timeStr_Time = currentTime.toLocaleTimeString();
+// console.log(timeStr_Time); 
+
+let timerId = null
+function updateElapsedTime() {
+  const now = new Date()
+  const diffMs = now - currentTime
+
+  const totalSeconds = Math.floor(diffMs / 1000)
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0')
+  const seconds = String(totalSeconds % 60).padStart(2, '0')
+
+  elapsedTime.value = `${minutes}:${seconds}`
+}
+
+onMounted(() => {
+  timerId = setInterval(updateElapsedTime, 1000)
+})
+onUnmounted(() => {
+  clearInterval(timerId)
+})
+
+const q_idx = ref(0);  // 질문 idx
+const items = ref([]) // 공고
+const question = ref([]) // 질문
+const sessionId = route.params.id // 면접 세션 ID
+const applicationId = route.params.applicationId // 공고 ID
+const messages = ref([]) // 출력될 메세지들
+const showQuestion = ref(false) // 질문 보기 여부
+const videoUrl = ref([]) // 비디오 링크
+const presign = ref([]) // 권한
+const intentText = ref([]) // 질문의도
+
+const audioUrl = ref('') 
+const audioChunks = ref([]) // 오디오 데이터 배열
+const mediaRecorder = ref(null) // 인스턴스
+const ttsUrl = ref([]) // 오디오 링크
+const transcript = ref('') // 음성 인식 결과
+const isRecording = ref(false) // 마이크 off
+const audioBlob = ref(null)
+const fileName = ref('')
+
+async function fetchApp() { // 공고 가져오기
+  try {
+    const response = await env.get(`/api/application/${applicationId}`, {
+      params: {
+        userId: parseInt(userStore.userId),
+        applicationId : applicationId
+      }
+    })
+    items.value = response.data.result
+
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+onMounted(fetchApp);
+
+async function fetchQuestion() { // 질문 가져오기 기능
+    if (q_idx.value >= question.value?.countAll) { 
+      console.log("마지막 질문 완료 : " + q_idx.value);
+      endTime.value = elapsedTime.value;
+      showCompleteModal.value = true; // 면접 종료 확인 모달창
+      return;
+    }
+  try {
+    const response = await env.get(`/api/interview/${sessionId}/question`, {
+      params: {
+        sessionId: sessionId,
+        seq: q_idx.value,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    question.value = response.data.result
+    videoUrl.value= response.data.result.videoUrl
+    ttsUrl.value = response.data.result.ttsUrl
+    intentText.value = response.data.result.intentText
+    inc_q_idx()
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+onMounted(fetchQuestion);
+
+async function fetchPresign() { // 답변 업로드용 s3접근 권한 presign 받아오기
+  try {
+    const response = await env.get('/api/interview/voice-putpresign', {
+      params: {
+        fileName : fileName.value,
+        userId: parseInt(userStore.userId)
+      }
+    })
+    console.log("파일명 : " + fileName.value)
+    presign.value = response.data.result.url
+    console.log(response.data.result)
+  } catch (err) {
+    console.error('데이터 불러오기 실패:', err)
+  }
+}
+
+function inc_q_idx() { // 질문 넘기기
+  if (q_idx.value >= question.value?.countAll) { 
+    console.log("마지막 질문 완료 : " + q_idx.value);
+    endTime.value = elapsedTime.value;
+    showCompleteModal.value = true; // 면접 종료 확인 모달창
+    return;
+  }
+  q_idx.value += 1;
+  // console.log("addidx : " + q_idx.value)
+}
+
+async function answerPass() { // 답변 패스
+    try {
+        const response = await env.post('/api/interview/interview-answer-pass', {
+            questionId: question.value?.interviewQuestionId, 
+            audioUrl: null,
+            isCheated: null
+          },{ params: {
+            userId: parseInt(userStore.userId)
+          }
+        })
+        console.log(response.data.message)
+        fetchQuestion()
+    } catch (err) {
+        console.error('데이터 불러오기 실패:', err)
+    }
+}
+
+function addMessage() { // 메세지 추가
+  // console.log("addMessage : " + intentText.value)
+  messages.value.push(intentText.value)
+  // console.log("addmsg : " + text)
+}
+
+function toggleQuestion() {
+  showQuestion.value = !showQuestion.value
+}
+
+// 웹캡
+onMounted(async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    if (webcamRef.value) {
+      webcamRef.value.srcObject = stream;
+    }
+  } catch (err) {
+    console.error('웹캠 접근 오류:', err);
+  }
+});
+
+// const interviewSession = computed(() => interview_sessions.find(i => i.id === sessionId)) // 면접 세션
+// const item = computed(() => { // 공고
+//   const itemId = interviewSession.value?.application_id
+//   return allItems.find(i => i.id === itemId)
+// })
+// const questions = computed(() => { // 면접 질문들 -> 여기 질문 순서 값으로 정렬한 번 해주기? 수정 필요
+//   return interview_questions.filter(i => i.session_id === sessionId)
+// })
+
+/*
+// 음성 인식
+let recognition = null 
+let isRecognizing = false // 내부 플래그(빠르게 연타 오류 방지용)
+onMounted(() => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!SpeechRecognition) {
+    alert('이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.')
+    return
+  }
+
+  recognition = new SpeechRecognition()
+  recognition.lang = 'ko-KR'// 한국어
+  recognition.interimResults = true // 중간 결과 표시 여부
+  recognition.continuous = true // 연속 인식 여부
+
+  recognition.onstart = () => {
+    isRecognizing = true
+    isRecording.value = true
+  }
+  
+  recognition.onresult = (event) => { // 정상 동작
+    const last = event.results[event.results.length - 1]
+    if (last.isFinal) {
+      transcript.value += last[0].transcript.trim() + ' '
+    }
+  }
+  recognition.onerror = (event) => { // 오류 -> 자동 종료
+    console.error('음성 인식 오류:', event.error)
+    isRecognizing = false
+    isRecording.value = false
+  }
+  recognition.onend = () => { // 끝 -> 종료
+    isRecognizing = false
+    isRecording.value = false
+  }
+})
+*/
+
+// const toggleRecording = () => { // 녹음 시작 / 정지
+//   if (!recognition) return
+
+//   if (isRecording.value) { // 녹음 정지
+//     recognition.stop()
+//   } else { // 녹음 시작
+//     recognition.start()
+//   }
+//   isRecording.value = !isRecording.value
+// }
+
+// 마이크
+const toggleRecording = async () => { // 녹음 시작 / 정지
+  if (isRecording.value) { // 녹음 정지
+    mediaRecorder.value.stop()
+    isRecording.value = false
+  } else { // 녹음 시작
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    
+    const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=opus')
+      ? 'video/webm; codecs=opus'
+      : 'video/webm';
+
+    mediaRecorder.value = new MediaRecorder(stream, { mimeType: 'video/webm' })
+    audioChunks.value = [] // 오디오 초기화
+
+    mediaRecorder.value.ondataavailable = (event) => {
+      audioChunks.value.push(event.data)
+    }
+
+    mediaRecorder.value.onstop = () => {
+      if (audioChunks.value.length === 0) return
+      audioBlob.value = new Blob(audioChunks.value, { type: 'video/webm' })
+      audioUrl.value = URL.createObjectURL(audioBlob.value)
+      audioChunks.value = [] // 오디오 초기화
+      console.log('녹음 완료. Blob:', audioBlob.value)
+      console.log(audioBlob.value.size)
+      console.log(audioBlob.value.type);
+    }
+
+    mediaRecorder.value.start()
+    isRecording.value = true
+  }
+}
+
+const resetTranscript = () => { // 재답변
+  // if (isRecording.value) {
+  //   recognition.stop()
+  //   isRecording.value = false
+  // }
+  // transcript.value = ''
+
+  if (isRecording.value && mediaRecorder.value?.state !== 'inactive') {
+    mediaRecorder.value.stop()
+  }
+  isRecording.value = false
+  audioChunks.value = []
+  audioBlob.value = null
+
+  console.log('재답변: 녹음 초기화 완료')
+}
+
+// async function convertWebmToMp3(blob) {
+//   if (!ffmpeg.isLoaded()) {
+//     await ffmpeg.load()
+//   }
+//   const inputFileName = 'input.webm'
+//   const outputFileName = 'output.mp3'
+
+//   ffmpeg.FS('writeFile', inputFileName, await fetchFile(blob))
+
+//   await ffmpeg.run('-i', inputFileName, outputFileName)
+
+//   const data = ffmpeg.FS('readFile', outputFileName)
+
+//   return new Blob([data.buffer], { type: 'audio/mp3' })
+// }
+
+// 답변완료
+const completeTranscript = async () => {
+  // if (!transcript.value.trim()) { // 답변 없으면 답변 완료 막기
+  //   console.warn("답변이 없습니다.");
+  //   alert("답변이 없습니다.");
+  //   return;
+  // }
+  if (!audioBlob.value) { // 답변 없으면 답변 완료 막기
+    alert("답변이 없습니다.");
+    return;
+  }
+
+  // const currentQuestion = questions.value[q_idx.value]; //이거 아마 삭제
+  // const answer = transcript.value;
+
+  // 음성 인식 중지 및 답변 초기화
+  // if (isRecording.value) {
+  //   recognition.stop();
+  //   isRecording.value = false;
+  // }
+  if (isRecording.value && mediaRecorder.value?.state !== 'inactive') {
+    mediaRecorder.value.stop();
+    isRecording.value = false;
+  }
+
+  try {
+    // 재생 테스트용 URL
+    const audiourl = URL.createObjectURL(audioBlob.value)
+    const audio = new Audio(audiourl)
+    audio.play() // 수정 필요
+
+    fileName.value = `${uuidv4()}.webm`
+    // const file = new File([audioBlob], fileName, {
+    //   type: 'audio/mp3',
+    // })
+    
+    // const mp3Blob = await convertWebmToMp3(audioBlob.value)
+
+    await fetchPresign()
+    const presignedUrl = presign.value
+    console.log("presignedUrl : " + presign.value)
+    // audioUrl.value = presign.additionalProp2
+
+    // 오디오 업로드
+    await fetch(presign.value, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'video/webm'
+      },
+      body: audioBlob.value,
+    })
+
+    postAnswer()
+
+    // transcript.value = '';
+    audioChunks.value = [];
+    audioBlob.value = null;
+    
+    fetchQuestion()
+
+  } catch (error) {
+    console.error("오류 : ", error);
+  }
+}
+
+async function postAnswer() { // 답변 저장
+    try {
+        const link = "https://demo-my-testbucket-277707098184.s3.ap-northeast-2.amazonaws.com/upload/audio/"
+        const audiourl = `${link}${fileName}`
+        const response = await env.post('/api/interview/interview-answer', {
+                questionId: question.value?.interviewQuestionId, 
+                audioUrl: audiourl,
+                isCheated: false
+            },
+            {params: {
+                userId: parseInt(userStore.userId)
+            }
+        })
+        console.log(response.data.message)
+    } catch (err) {
+        console.error('데이터 보내기 실패:', err)
+    }
+}
+
+const confirmEnd = () => { // 면접 종료
+  console.log("면접 종료 확인");  
+  showCompleteModal.value = false;
+  router.push({ name: 'InterviewResult', params: { applicationId : applicationId, id : sessionId } });
+};
+async function subscribeInterview() {
+  try {
+    const response = await env.get(`/api/interview/subscribe/${sessionId}`)
+    console.log('생성 성공:', response.data.message)
+    confirmEnd()
+  } catch (error) {
+    console.error('생성 실패:', error)
+  }
+}
+
+</script>

@@ -64,8 +64,6 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import env from '../api/env'
-
-
 onMounted(async () => { // 어떤걸 보낼지 체크
     try {
         const res = await env.get('/api/survey/disc/result')
@@ -100,5 +98,4 @@ function init(res){
 
     discKeywords.value = result.keywords
 }
-
 </script>

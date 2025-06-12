@@ -1,7 +1,8 @@
+<!-- 네비게이터 -->
 <template>
     <nav class="nav-bar relative">
         <div class="nav-item">
-          <router-link to="/">AI 면접 서비스</router-link>
+          <router-link to="/">Jobveloper</router-link>
         </div>
         
         <div class="nav-item absolute left-1/2 transform -translate-x-1/2">
@@ -42,14 +43,13 @@
               마이페이지
               <img src="../assets/mypage_icon.svg" class="w-4 h-4 ml-1" alt="" />
             </router-link>
+          </div>
+            
         </div>
         </div>
     </nav>
 
 </template>
-<<<<<<< Updated upstream
-
-=======
 <script setup>
   import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
   import { useRouter } from 'vue-router';
@@ -94,7 +94,6 @@ const handleClickOutside = (e) => {
   const isGuest = computed(() => user.userName === '로그인')
   const isOpenInfo = ref(false)
 </script>
->>>>>>> Stashed changes
 
 <style scoped>
 .nav-bar { /* 네비게이션 바, z-index : 40 */
@@ -108,9 +107,9 @@ const handleClickOutside = (e) => {
   left: 0;
   padding: 20px 120px;
   z-index: 40;
-  backdrop-filter: blur(10px); /* 백드롭 필터 - 네비게이션 블러 처리 */
+  backdrop-filter: blur(100px); /* 백드롭 필터 - 네비게이션 블러 처리 */
 }
-.nav-item { /* 알약 모양 도형형 */
+.nav-item { /* 알약 모양 도형 */
   display: flex;
   padding: 10px 25px;
   background-color: rgba(255, 255, 255, 0.6);
@@ -120,9 +119,10 @@ const handleClickOutside = (e) => {
   align-items: center;
 }
 
-.nav-item span { /* span 간격 조정 */
+/* span 간격 조정 */
+/* .nav-item span { 
   margin-right: 20px;
-}
+} */
 
 .nav-item a { /* 링크 스타일 변경 */
   text-decoration: none; 

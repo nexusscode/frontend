@@ -166,7 +166,6 @@
     console.error('데이터 로딩 에러:', error)
   }
 })
-    
 /*
     onBeforeMount(async () => {
         try {
