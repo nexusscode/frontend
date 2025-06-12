@@ -65,9 +65,7 @@
     document.removeEventListener('click', handleClickOutside)
   })
 
-  const pinia = createPinia()
   const router = useRouter()
-  setActivePinia(pinia)
   const user = useUserStore()
   const doLogout = async () => {
     const res = await env.post(`/api/user/logout`, null, {headers: {
