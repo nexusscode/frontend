@@ -63,15 +63,22 @@
     <!-- 어휘 및 문법 -->
     <div class="flex w-full mb-12 flex-col gap-y-4">
         <span class="font-semibold text-xl">어휘 및 문법</span>
-        <div class="flex">
-            <div class="flex flex-col bg-white w-fit p-8 rounded-2xl">
+        <div class="flex flex-col">
+            <div class="flex flex-col gap-y-4 bg-white w-full p-8 rounded-2xl">
+              <span class="font-semibold text-xl">어휘 수준 평가</span>
+              <div class="flex flex-col gap-y-3 ml-3"> 
+                <span class="font-medium text-xl">{{ vocabularyEvaluation?.levelComment }}</span>
+              </div>
+            </div>
+            <div class="flex">
+            <div class="flex flex-col mt-4 bg-white w-fit p-8 rounded-2xl">
                 <span class="flex font-semibold text-xl">어휘</span>
                 <div
-                    class="w-72 h-24 mx-16 mt-4 relative"
+                    class="w-72 h-28 mx-16 mt-4 relative"
                     style="border-radius: 50%; background: radial-gradient(circle at center, rgba(104,198,249,0.4) 0%, rgba(169,231,240,0.4) 100%);"
                 >
                     <span
-                        v-for="(voca, index) in vocas"
+                        v-for="(voca, index) in wordArray"
                         :key="index"
                         class="absolute font-semibold text-xl"
                         :style="getPosition(index)"
@@ -81,14 +88,17 @@
                 </div>
             </div>
 
-            <div class="ml-12 flex items-center">
+            <div class="ml-12 mr-4 flex items-center">
                 <span class="font-semibold text-xl">
-                {{ interview?.vocabularyEvaluation.repeatedWordsSummary }} <br/>
-                
+                  <ul>
+                    <li v-for="(suggestion, index) in suggestionArray" :key="index">
+                      - {{ suggestion }}
+                    </li>
+                  </ul>
                 </span>
             </div>
         </div>
-
+        </div>
     </div>
 
     <!-- 스타일 분석 -->
@@ -165,14 +175,29 @@ async function fetchInterview() { // 면접 세션 정보 가져오기
     seconds.value = response.data.result.questions.map(q => parseInt(q.second))
     totalSeconds.value = parseInt(interview.value.countSeconds)
     totalCount.value = parseInt(interview.value.totalCount)
+    repeatedWords.value = response.data.result.vocabularyEvaluation.repeatedWordsSummary
+    vocabularyEvaluation.value = response.data.result.vocabularyEvaluation
+    console.log("vocabularyEvaluation : " + vocabularyEvaluation.value)
     console.log("답변 초들 : " + seconds.value, "타입 확인:", seconds.value.map(s => typeof s))
     console.log("interview : " + interview.value.title) 
     console.log("totalSeconds : ", totalSeconds.value, "type:", typeof totalSeconds.value)
     console.log("totalCount : ", totalCount.value, "type:", typeof totalCount.value)
+  
+    wordArray.value = repeatedWords.value
+      .replace(/\*\*/g, '')
+      .split(',')
+      .map(word => word.trim())
+
+    suggestionArray.value = vocabularyEvaluation.value.improvementSuggestions
+      .split(/-\s+/)           
+      .filter(item => item)   
+      .map(item => item.trim()) 
+
   } catch (err) {
     console.error('데이터 불러오기 실패:', err)
   }
   calculateAverageTime()
+  
 }
 onMounted(fetchInterview);
 
@@ -190,8 +215,7 @@ onMounted(fetchApp);
 
 // 답변 관련 임시 데이터들 -> 나중에 수정
 const seconds = ref([])
-// const seconds = [60, 85, 160, 50, 35, 70, 25, 55, 60, 40]
-const vocas = ['조금', '그리고', '그리고', '약간', '그러니까']
+// const vocas = ['조금', '그리고', '그리고', '약간', '그러니까']
 
 function getPosition(index) {
   switch (index) {
@@ -248,6 +272,11 @@ const avgSeconds = ref(0)
 const avgMinutes = ref(0)
 const avgRemainingSeconds = ref(0)
 const averageMinutes = ref('')
+const repeatedWords = ref([])
+const vocabularyEvaluation = ref([])
+const wordArray = ref([])
+const suggestionArray= ref([])
+
 // const avgSeconds = totalSeconds / seconds.length; // 평균 초
 function calculateAverageTime() {
   avgSeconds.value = totalSeconds.value / totalCount.value; // 평균 초
@@ -281,15 +310,14 @@ ChartJS.register(
 const isChartReady = ref(false)
 const chartData = computed(() => {
   return {
-  labels: Array.from({ length: totalCount }, (_, i) => i + 1),
+  labels: Array.from({ length: totalCount.value }, (_, i) => i + 1),
   datasets: [
     {
       label: '',
       data: seconds.value,
-      //answers.value.map(answer => new Number(answer.created_at)), // 수정 필요 -> 응답 시간 부분
       borderColor: 'rgba(80, 137, 252, 1)', // btnBlue
       backgroundColor: 'rgba(255, 255, 255, 1)',
-      pointRadius: 0, 
+      pointRadius: 0,
     }
   ]
   }
